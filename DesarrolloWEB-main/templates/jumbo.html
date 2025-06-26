@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ofertas Jumbo - Supermercado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #370dce 0%, #fda085 100%);
+        }
+        .jumbo-green {
+            color: #00a650;
+        }
+        
+        .jumbo-bg-green {
+            background-color: #00a650;
+        }
+        
+        .filter-item:hover {
+            color: #00a650;
+            border-color: #00a650;
+        }
+        
+        .filter-item.active {
+            background-color: #00a650;
+            color: white;
+            border-color: #00a650;
+        }
+        
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .discount-badge {
+            background-color: #ffd700;
+            color: black;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .price-before {
+            text-decoration: line-through;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,166,80,.3);
+            border-radius: 50%;
+            border-top-color: #00a650;
+            animation: spin 1s ease-in-out infinite;
+        }
+        .arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.3em; /* TAMAÑO DE LA FLECHA */
+            background-color: rgba(0, 0, 0, 0.3);  /* Transparencia */
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            padding: 0.4em 0.7em; /* ESPACIO ALREDEDOR */
+            border-radius: 8px;
+            transition: background-color 0.3s; 
+
+        }
+        .arrow:hover {
+            background-color: rgba(0, 0, 0, 0.5); /* Más visible al pasar el mouse */
+        }
+        .arrow.left {
+            left: 10px;
+        }
+        .arrow.right {
+            right: 10px;
+        }
+        /*  para puntos*/
+       .offer-slider {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .slider {
+            position: relative;
+            width: 100%;
+            height: auto;
+            margin: 0 auto;
+            overflow: hidden;
+            /*aspect-ratio: 16 / 9; /* Ajusta el alto automáticamente con relación 16:9 */
+        }
+
+        .slides {
+            display: flex;
+            transition: transform 0.5s ease;
+            width: 100%;
+        }
+
+        .slides img {
+            width: 100%;
+            height: auto;
+            object-fit: scale-down; /* Asegura que no se recorte la imagen */
+            flex-shrink: 0;
+            max-width: 100vw; /* LIMITE DE ANCHO MÁXIMO */
+
+        }
+        .dot.active {
+            background-color: #00a650 !important;
+            transform: scale(1.1);
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+  <header class="gradient-bg text-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-bear text-3xl"></i>
+                    <h1 class="text-2xl font-bold">Descuentos Bear</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="{{ url_for('home') }}" class="hover:text-yellow-200 font-medium">Inicio</a>
+                    <a href="{{ url_for('ofertas') }}" class="hover:text-yellow-200 font-medium">Ofertas</a>
+                    <a href="{{ url_for('home') }}#asociados" class="hover:text-yellow-200 font-medium">Tiendas</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <button class="bg-white text-orange-500 px-4 py-2 rounded-full font-medium hover:bg-yellow-50">
+                        <i class="fas fa-user mr-2"></i>Ingresar
+                    </button>
+                    <button class="md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+        <!-- Contenido del slide -->
+    <section class="offer-slider">
+        <div class="slider">
+            <div class="slides" id="slides">
+                <img src="{{ url_for('static', filename='img/jumbo-slide1.png') }}" alt="Oferta 1">
+                <img src="{{ url_for('static', filename='img/jumbo-slide2.png') }}" alt="Oferta 2">
+                <img src="{{ url_for('static', filename='img/jumbo-slide3.png') }}" alt="Oferta 3">
+                <img src="{{ url_for('static', filename='img/jumbo-slide4.png') }}" alt="Oferta 4">
+                <img src="{{ url_for('static', filename='img/jumbo-slide5.png') }}" alt="Oferta 5">
+            </div>
+            
+            <!-- Dots navigation -->
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+                <div class="dot rounded-full w-3 h-3 bg-gray-300 cursor-pointer active" onclick="goToSlide(0)"></div>
+                <div class="dot rounded-full w-3 h-3 bg-gray-300 cursor-pointer" onclick="goToSlide(1)"></div>
+                <div class="dot rounded-full w-3 h-3 bg-gray-300 cursor-pointer" onclick="goToSlide(2)"></div>
+                <div class="dot rounded-full w-3 h-3 bg-gray-300 cursor-pointer" onclick="goToSlide(3)"></div>
+                <div class="dot rounded-full w-3 h-3 bg-gray-300 cursor-pointer" onclick="goToSlide(4)"></div>
+            </div>
+        </div>
+        
+        <!--<button class="arrow left" onclick="prevSlide()">❮</button>
+        <button class="arrow right" onclick="nextSlide()">❯</button>     maraca algo con el ❮   -->
+        <button class="arrow left" onclick="prevSlide()">&lsaquo;</button>
+        <button class="arrow right" onclick="nextSlide()">&rsaquo;</button>
+
+    </section>
+
+    <!-- Contenido principal -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Título y descripción -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2 jumbo-green">Ofertas Jumbo</h1>
+            <p class="text-gray-600">Aprovecha las mejores ofertas en productos de supermercado</p>
+        </div>
+
+        <!-- Filtros principales -->
+<!-- Filtros principales en dos filas -->
+        <div class="mb-6">
+          <div class="flex flex-wrap gap-2">
+            <button class="filter-item active px-4 py-2 rounded-full border" data-category="all">Todas las ofertas</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="abarrotes">Abarrotes</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="bebidas">Bebidas</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="lacteos">Lácteos</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="carnes">Carnes</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="frutas-verduras">Frutas y Verduras</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="bebes">Bebés</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="mascotas">Mascotas</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="hogar">Hogar</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="ropa">Ropa</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="tecnologia">Tecnología</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="juguetes">Juguetes</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="farmacia">Farmacia</button>
+          </div>
+        </div>
+
+        <!-- Filtros secundarios -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Filtro por marca -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                    <select id="marca-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="all">Todas las marcas</option>
+                        <option value="colun">Colun</option>
+                        <option value="soprole">Soprole</option>
+                        <option value="nestle">Nestlé</option>
+                        <option value="lays">Lays</option>
+                        <option value="cocacola">Coca-Cola</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por precio -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                    <select id="precio-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="all">Cualquier precio</option>
+                        <option value="0-1000">Hasta $1.000</option>
+                        <option value="1000-3000">$1.000 - $3.000</option>
+                        <option value="3000-5000">$3.000 - $5.000</option>
+                        <option value="5000+">Más de $5.000</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por descuento -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descuento</label>
+                    <select id="descuento-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="all">Cualquier descuento</option>
+                        <option value="10">10% o más</option>
+                        <option value="20">20% o más</option>
+                        <option value="30">30% o más</option>
+                        <option value="40">40% o más</option>
+                        <option value="50">50% o más</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por orden -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+                    <select id="orden-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="recomendados">Recomendados</option>
+                        <option value="menor-precio">Menor precio</option>
+                        <option value="mayor-precio">Mayor precio</option>
+                        <option value="mayor-descuento">Mayor descuento</option>
+                        <option value="nombre-az">Nombre A-Z</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading state -->
+        <div id="loading" class="hidden text-center py-8">
+            <div class="loading mx-auto"></div>
+            <p class="mt-2 text-gray-600">Buscando ofertas...</p>
+        </div>
+
+        <!-- Listado de productos -->
+        <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Los productos se cargarán aquí dinámicamente -->
+        </div>
+
+        <!-- Paginación -->
+        <div class="mt-10 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                <button id="prev-page" class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="px-3 py-1 rounded border bg-green-500 text-white page-btn active" data-page="1">1</button>
+                <button class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 page-btn" data-page="2">2</button>
+                <button class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 page-btn" data-page="3">3</button>
+                <button class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 page-btn" data-page="4">4</button>
+                <button class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 page-btn" data-page="5">5</button>
+                <button id="next-page" class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </nav>
+        </div>
+    </main>
+
+    <script>
+        // Datos de productos (simulados)
+        const productos = [
+            {
+                id: 1,
+                nombre: "Leche Colun Descremada 1L",
+                descripcion: "Pack x 2 unidades",
+                precioOriginal: 2580,
+                precioOferta: 1798,
+                precioUnitario: 899,
+                descuento: 30,
+                marca: "colun",
+                categoria: "lacteos",
+                imagen: "https://via.placeholder.com/200x200?text=Leche+Colun"
+            },
+            {
+                id: 2,
+                nombre: "Arroz Tucapel Grano Largo 5Kg",
+                descripcion: "Bolsa 5 kilogramos",
+                precioOriginal: 5990,
+                precioOferta: 4490,
+                precioUnitario: 898,
+                descuento: 25,
+                marca: "tucapel",
+                categoria: "despensa",
+                imagen: "https://via.placeholder.com/200x200?text=Arroz+Tucapel"
+            },
+            {
+                id: 3,
+                nombre: "Aceite de Oliva O-Live 500ml",
+                descripcion: "Botella 500ml",
+                precioOriginal: 6990,
+                precioOferta: 4190,
+                precioUnitario: 838,
+                descuento: 40,
+                marca: "olive",
+                categoria: "despensa",
+                imagen: "https://via.placeholder.com/200x200?text=Aceite+Oliva"
+            },
+            {
+                id: 4,
+                nombre: "Pack 6 Coca-Cola 1.5L",
+                descripcion: "Pack x 6 botellas",
+                precioOriginal: 7990,
+                precioOferta: 3990,
+                precioUnitario: 665,
+                descuento: 50,
+                marca: "cocacola",
+                categoria: "bebidas",
+                imagen: "https://via.placeholder.com/200x200?text=Coca-Cola+Pack"
+            },
+            {
+                id: 5,
+                nombre: "Atún Calvo en Agua 170g",
+                descripcion: "Lata 170 gramos",
+                precioOriginal: 1490,
+                precioOferta: 990,
+                precioUnitario: 582,
+                descuento: 33,
+                marca: "calvo",
+                categoria: "despensa",
+                imagen: "https://via.placeholder.com/200x200?text=Atún+Calvo"
+            },
+            {
+                id: 6,
+                nombre: "Jabón Líquido Cuidado Suave 1L",
+                descripcion: "Botella 1 litro",
+                precioOriginal: 3990,
+                precioOferta: 2990,
+                precioUnitario: 2990,
+                descuento: 25,
+                marca: "suave",
+                categoria: "limpieza",
+                imagen: "https://via.placeholder.com/200x200?text=Jabón+Líquido"
+            },
+            {
+                id: 7,
+                nombre: "Manzanas Royal Gala 1Kg",
+                descripcion: "Bolsa 1 kilogramo",
+                precioOriginal: 2990,
+                precioOferta: 1990,
+                precioUnitario: 1990,
+                descuento: 33,
+                marca: "royal",
+                categoria: "frutas-verduras",
+                imagen: "https://via.placeholder.com/200x200?text=Manzanas+Gala"
+            },
+            {
+                id: 8,
+                nombre: "Pollo Entero Congelado 2Kg",
+                descripcion: "Bolsa 2 kilogramos",
+                precioOriginal: 7990,
+                precioOferta: 5990,
+                precioUnitario: 2995,
+                descuento: 25,
+                marca: "superpollo",
+                categoria: "carnes",
+                imagen: "https://via.placeholder.com/200x200?text=Pollo+Congelado"
+            },
+            {
+                id: 9,
+                nombre: "Yogurt Soprole Natural 1Kg",
+                descripcion: "Pote 1 kilogramo",
+                precioOriginal: 1990,
+                precioOferta: 1490,
+                precioUnitario: 1490,
+                descuento: 25,
+                marca: "soprole",
+                categoria: "lacteos",
+                imagen: "https://via.placeholder.com/200x200?text=Yogurt+Soprole"
+            },
+            {
+                id: 10,
+                nombre: "Papas Lays Clásicas 100g",
+                descripcion: "Bolsa 100 gramos",
+                precioOriginal: 990,
+                precioOferta: 690,
+                precioUnitario: 690,
+                descuento: 30,
+                marca: "lays",
+                categoria: "despensa",
+                imagen: "https://via.placeholder.com/200x200?text=Papas+Lays"
+            },
+            {
+                id: 11,
+                nombre: "Leche NIDO Fortificada 800g",
+                descripcion: "Lata 800 gramos",
+                precioOriginal: 5990,
+                precioOferta: 4990,
+                precioUnitario: 624,
+                descuento: 17,
+                marca: "nestle",
+                categoria: "lacteos",
+                imagen: "https://via.placeholder.com/200x200?text=Leche+NIDO"
+            },
+            {
+                id: 12,
+                nombre: "Detergente líquido OMO 3L",
+                descripcion: "Botella 3 litros",
+                precioOriginal: 8990,
+                precioOferta: 5990,
+                precioUnitario: 1997,
+                descuento: 33,
+                marca: "omo",
+                categoria: "limpieza",
+                imagen: "https://via.placeholder.com/200x200?text=Detergente+OMO"
+            },
+            {
+                id: 13,
+                nombre: "Arroz Grano Largo 1kg",
+                descripcion: "Bolsa de 1 kilo",
+                precioOriginal: 1290,
+                precioOferta: 990,
+                precioUnitario: 990,
+                descuento: 23,
+                marca: "Tucapel",
+                categoria: "abarrotes",
+                imagen: "https://via.placeholder.com/200x200?text=Arroz+Tucapel"
+            },
+            {
+                id: 14,
+                nombre: "Coca-Cola 1.5L",
+                descripcion: "Botella desechable",
+                precioOriginal: 1790,
+                precioOferta: 1390,
+                precioUnitario: 1390,
+                descuento: 22,
+                marca: "coca-cola",
+                categoria: "bebidas",
+                imagen: "https://via.placeholder.com/200x200?text=Coca-Cola"
+            },
+            {
+                id: 15,
+                nombre: "Yogur Batido Frutilla 125g",
+                descripcion: "Unidad sabor frutilla",
+                precioOriginal: 490,
+                precioOferta: 350,
+                precioUnitario: 350,
+                descuento: 29,
+                marca: "colun",
+                categoria: "lacteos",
+                imagen: "https://via.placeholder.com/200x200?text=Yogur+Colun"
+            },
+            {
+                id: 16,
+                nombre: "Pechuga de Pollo 1kg",
+                descripcion: "Producto fresco",
+                precioOriginal: 4990,
+                precioOferta: 4290,
+                precioUnitario: 4290,
+                descuento: 14,
+                marca: "superpollo",
+                categoria: "carnes",
+                imagen: "https://via.placeholder.com/200x200?text=Pechuga+Pollo"
+            },
+            {
+                id: 17,
+                nombre: "Manzanas Rojas 1kg",
+                descripcion: "Producto fresco",
+                precioOriginal: 1990,
+                precioOferta: 1490,
+                precioUnitario: 1490,
+                descuento: 25,
+                marca: "campoalto",
+                categoria: "frutas/verdura",
+                imagen: "https://via.placeholder.com/200x200?text=Manzanas+Rojas"
+            },
+            {
+                id: 18,
+                nombre: "Pañales Pampers Talla M (x60)",
+                descripcion: "Pack de 60 unidades",
+                precioOriginal: 15990,
+                precioOferta: 12990,
+                precioUnitario: 217,
+                descuento: 19,
+                marca: "pampers",
+                categoria: "bebes",
+                imagen: "https://via.placeholder.com/200x200?text=Pañales+Pampers"
+            },
+            {
+                id: 19,
+                nombre: "Alimento Seco para Perro 15kg",
+                descripcion: "Bolsa de 15 kilos",
+                precioOriginal: 29990,
+                precioOferta: 24990,
+                precioUnitario: 1666,
+                descuento: 17,
+                marca: "dogchow",
+                categoria: "mascotas",
+                imagen: "https://via.placeholder.com/200x200?text=Dog+Chow"
+            },
+            {
+                id: 20,
+                nombre: "Plumón 2 Plazas",
+                descripcion: "Color gris, 2 plazas",
+                precioOriginal: 24990,
+                precioOferta: 19990,
+                precioUnitario: 19990,
+                descuento: 20,
+                marca: "rosen",
+                categoria: "hogar",
+                imagen: "https://via.placeholder.com/200x200?text=Plumón+Rosen"
+            },
+            {
+                id: 21,
+                nombre: "Polera Hombre Talla L",
+                descripcion: "Color negro",
+                precioOriginal: 6990,
+                precioOferta: 4990,
+                precioUnitario: 4990,
+                descuento: 29,
+                marca: "basement",
+                categoria: "ropa",
+                imagen: "https://via.placeholder.com/200x200?text=Polera+Hombre"
+            },
+            {
+                id: 22,
+                nombre: "Smartphone Samsung Galaxy A14",
+                descripcion: "64GB, negro",
+                precioOriginal: 199990,
+                precioOferta: 159990,
+                precioUnitario: 159990,
+                descuento: 20,
+                marca: "samsung",
+                categoria: "tecnologia",
+                imagen: "https://via.placeholder.com/200x200?text=Galaxy+A14"
+            },
+            {
+                id: 23,
+                nombre: "Lego Classic 500 piezas",
+                descripcion: "Caja creativa mediana",
+                precioOriginal: 29990,
+                precioOferta: 23990,
+                precioUnitario: 23990,
+                descuento: 20,
+                marca: "lego",
+                categoria: "juguetes",
+                imagen: "https://via.placeholder.com/200x200?text=LEGO+Classic"
+            },
+            {
+                id: 24,
+                nombre: "Paracetamol 500mg x 24",
+                descripcion: "Caja con 24 comprimidos",
+                precioOriginal: 1990,
+                precioOferta: 990,
+                precioUnitario: 990,
+                descuento: 50,
+                marca: "genérico",
+                categoria: "farmacia",
+                imagen: "https://via.placeholder.com/200x200?text=Paracetamol"
+            },
+            {
+                id: 25,
+                nombre: "Aceite Maravilla 1L",
+                descripcion: "Botella de un litro",
+                precioOriginal: 2390,
+                precioOferta: 1890,
+                precioUnitario: 1890,
+                descuento: 21,
+                marca: "maravilla",
+                categoria: "abarrotes",
+                imagen: "https://via.placeholder.com/200x200?text=Aceite+Maravilla"
+            },
+            {
+                id: 26,
+                nombre: "Jugo Andina Naranja 1L",
+                descripcion: "Botella de jugo 1L",
+                precioOriginal: 1890,
+                precioOferta: 1390,
+                precioUnitario: 1390,
+                descuento: 26,
+                marca: "andina",
+                categoria: "bebidas",
+                imagen: "https://via.placeholder.com/200x200?text=Jugo+Andina"
+            },
+            {
+                id: 27,
+                nombre: "Queso Gauda Laminado 250g",
+                descripcion: "Paquete 250 gramos",
+                precioOriginal: 3490,
+                precioOferta: 2790,
+                precioUnitario: 1116,
+                descuento: 20,
+                marca: "colun",
+                categoria: "lacteos",
+                imagen: "https://via.placeholder.com/200x200?text=Queso+Colun"
+            }
+            
+        ];
+
+        // Variables de estado
+        let currentPage = 1;
+        const productsPerPage = 8;
+        let filteredProducts = [...productos];
+
+        // Elementos del DOM
+        const productosContainer = document.getElementById('productos-container');
+        const loadingElement = document.getElementById('loading');
+        const filterItems = document.querySelectorAll('.filter-item');
+        const marcaFilter = document.getElementById('marca-filter');
+        const precioFilter = document.getElementById('precio-filter');
+        const descuentoFilter = document.getElementById('descuento-filter');
+        const ordenFilter = document.getElementById('orden-filter');
+        const pageButtons = document.querySelectorAll('.page-btn');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+
+        // Función para formatear precios
+        function formatPrice(price) {
+            return '$' + price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Función para renderizar productos
+        function renderProducts(products, page) {
+            loadingElement.classList.remove('hidden');
+            productosContainer.innerHTML = '';
+            
+            // Simular carga asíncrona
+            setTimeout(() => {
+                const start = (page - 1) * productsPerPage;
+                const end = start + productsPerPage;
+                const paginatedProducts = products.slice(start, end);
+                
+                if (paginatedProducts.length === 0) {
+                    productosContainer.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-medium text-gray-700">No se encontraron productos</h3>
+                            <p class="text-gray-500 mt-2">Intenta con otros filtros</p>
+                        </div>
+                    `;
+                } else {
+                    paginatedProducts.forEach(producto => {
+                        const productCard = document.createElement('div');
+                        productCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden product-card transition duration-300';
+                        productCard.innerHTML = `
+                            <div class="relative p-4">
+                                <span class="discount-badge absolute top-4 left-4 px-2 py-1 rounded text-xs font-bold">${producto.descuento}%</span>
+                                <img src="${producto.imagen}" alt="${producto.nombre}" class="w-full h-48 object-contain mx-auto">
+                            </div>
+                            <div class="p-4 border-t">
+                                <h3 class="font-bold text-lg mb-1">${producto.nombre}</h3>
+                                <p class="text-gray-500 text-sm mb-2">${producto.descripcion}</p>
+                                <div class="flex items-center mb-2">
+                                    <span class="text-gray-400 price-before text-sm mr-2">${formatPrice(producto.precioOriginal)}</span>
+                                    <span class="text-green-600 font-bold text-lg">${formatPrice(producto.precioOferta)}</span>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-3">${formatPrice(producto.precioUnitario)} ${producto.descripcion.includes('Kg') ? 'x Kg' : producto.descripcion.includes('L') ? 'x L' : producto.descripcion.includes('g') ? 'x 100g' : 'x u'}</p>
+                                <button class="w-full jumbo-bg-green text-white py-2 rounded-md hover:bg-green-700 transition duration-300 add-to-cart" data-id="${producto.id}">
+                                    Agregar al carro
+                                </button>
+                            </div>
+                        `;
+                        productosContainer.appendChild(productCard);
+                    });
+                }
+                
+                loadingElement.classList.add('hidden');
+                
+                // Actualizar botones de paginación
+                updatePaginationButtons(products.length);
+            }, 500);
+        }
+
+        // Función para actualizar botones de paginación
+        function updatePaginationButtons(totalProducts) {
+            const totalPages = Math.ceil(totalProducts / productsPerPage);
+            
+            // Ocultar/mostrar botones de página según sea necesario
+            pageButtons.forEach(btn => {
+                const pageNum = parseInt(btn.dataset.page);
+                btn.classList.toggle('hidden', pageNum > totalPages);
+                
+                if (pageNum === currentPage) {
+                    btn.classList.add('bg-green-500', 'text-white');
+                    btn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+                } else {
+                    btn.classList.remove('bg-green-500', 'text-white');
+                    btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+                }
+            });
+            
+            // Deshabilitar botones de anterior/siguiente cuando corresponda
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Función para filtrar productos
+        function filterProducts() {
+            const activeCategory = document.querySelector('.filter-item.active').dataset.category;
+            const marca = marcaFilter.value;
+            const precio = precioFilter.value;
+            const descuento = descuentoFilter.value;
+            const orden = ordenFilter.value;
+            
+            filteredProducts = productos.filter(producto => {
+                // Filtrar por categoría
+                if (activeCategory !== 'all' && producto.categoria !== activeCategory) {
+                    return false;
+                }
+                
+                // Filtrar por marca
+                if (marca !== 'all' && producto.marca !== marca) {
+                    return false;
+                }
+                
+                // Filtrar por precio
+                if (precio !== 'all') {
+                    const [min, max] = precio.split('-').map(Number);
+                    if (precio === '5000+') {
+                        if (producto.precioOferta <= 5000) return false;
+                    } else if (max) {
+                        if (producto.precioOferta < min || producto.precioOferta > max) return false;
+                    } else {
+                        if (producto.precioOferta > min) return false;
+                    }
+                }
+                
+                // Filtrar por descuento
+                if (descuento !== 'all' && producto.descuento < parseInt(descuento)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Ordenar productos
+            switch (orden) {
+                case 'menor-precio':
+                    filteredProducts.sort((a, b) => a.precioOferta - b.precioOferta);
+                    break;
+                case 'mayor-precio':
+                    filteredProducts.sort((a, b) => b.precioOferta - a.precioOferta);
+                    break;
+                case 'mayor-descuento':
+                    filteredProducts.sort((a, b) => b.descuento - a.descuento);
+                    break;
+                case 'nombre-az':
+                    filteredProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                    break;
+                default:
+                    // Recomendados (orden original)
+                    break;
+            }
+            
+            currentPage = 1;
+            renderProducts(filteredProducts, currentPage);
+        }
+
+        // Event listeners
+        filterItems.forEach(item => {
+            item.addEventListener('click', () => {
+                filterItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                filterProducts();
+            });
+        });
+
+        [marcaFilter, precioFilter, descuentoFilter, ordenFilter].forEach(filter => {
+            filter.addEventListener('change', filterProducts);
+        });
+
+        pageButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentPage = parseInt(btn.dataset.page);
+                renderProducts(filteredProducts, currentPage);
+            });
+        });
+
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderProducts(filteredProducts, currentPage);
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderProducts(filteredProducts, currentPage);
+            }
+        });
+
+        // Event delegation para botones de agregar al carrito
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-to-cart')) {
+                const productId = parseInt(e.target.dataset.id);
+                const product = productos.find(p => p.id === productId);
+                alert(`Agregado al carrito: ${product.nombre}`);
+                // Aquí iría la lógica real para agregar al carrito
+            }
+        });
+
+        // Renderizar productos iniciales
+        renderProducts(filteredProducts, currentPage);
+        let currentIndex = 0;
+
+
+        // creo que esta es la parte del slider
+        let currentSlide = 0;
+        const slides = document.getElementById('slides');
+        const dots = document.querySelectorAll('.dot');
+        const totalSlides = document.querySelectorAll('.slides img').length;
+        
+        // Inicializar el slider
+        function initSlider() {
+            updateDots();
+            // Auto slide cada 5 segundos
+            setInterval(() => {
+                nextSlide();
+            }, 5000);
+        }
+        
+        // Cambiar a slide anterior
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+            updateSlider();
+            updateDots();
+        }
+        
+        // Cambiar a siguiente slide
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateSlider();
+            updateDots();
+        }
+        
+        // Ir a un slide específico
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlider();
+            updateDots();
+        }
+        
+        // Actualizar la posición del slider
+        function updateSlider() {
+            slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+        }
+        
+        // Actualizar los puntos de navegación
+        function updateDots() {
+            dots.forEach((dot, index) => {
+                if (index === currentSlide) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+        
+        // Inicializar el slider cuando el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', initSlider);
+
+    </script>
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-bear mr-2"></i> Descuentos Bear
+                    </h3>
+                    <p class="text-gray-400">Encuentra las mejores ofertas en supermercados chilenos y ahorra en tus compras diarias.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Enlaces útiles</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Preguntas frecuentes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Cómo funciona</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Términos y condiciones</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Política de privacidad</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contáctanos</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Supermercados</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('jumbo') }}" class="text-gray-400 hover:text-white">Jumbo</a></li>
+                        <li><a href="{{ url_for('lider') }}" class="text-gray-400 hover:text-white">Lider</a></li>
+                        <li><a href="{{ url_for('santaisabel') }}" class="text-gray-400 hover:text-white">Santa Isabel</a></li>
+                        <li><a href="{{ url_for('unimarc') }}" class="text-gray-400 hover:text-white">Unimarc</a></li>
+                        <li><a href="{{ url_for('alvi') }}" class="text-gray-400 hover:text-white">Alvi</a></li>
+                        <li><a href="{{ url_for('tottus') }}" class="text-gray-400 hover:text-white">Tottus</a></li>
+                    </ul>
+                </div>
+                
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 Descuentos Bear. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
+
+<!--d9291c-->

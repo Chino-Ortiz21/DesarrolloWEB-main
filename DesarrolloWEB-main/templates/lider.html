@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ofertas Lider - Supermercado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #370dce 0%, #fda085 100%);
+        }
+        .lider-blue {
+            color: #0071dc;
+        }
+        
+        .lider-bg-blue {
+            background-color: #0071dc;
+        }
+        
+        .filter-item:hover {
+            color: #0071dc;
+            border-color: #0071dc;
+        }
+        
+        .filter-item.active {
+            background-color: #0071dc;
+            color: white;
+            border-color: #0071dc;
+        }
+        
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .discount-badge {
+            background-color: #ffd700;
+            color: black;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .price-before {
+            text-decoration: line-through;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #002d58;
+            border-radius: 50%;
+            border-top-color: #004f9a;
+            animation: spin 1s ease-in-out infinite;
+        }
+        .slider-container {
+            height: 400px;
+            transition: all 0.5s ease;
+        }
+        .slide {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            position: absolute;
+            width: 100%;
+        }
+        .slide.active {
+            opacity: 1;
+        }
+        .dot {
+            width: 12px;
+            height: 12px;
+            transition: all 0.3s ease;
+        }
+        .dot.active {
+            width: 30px;
+            background-color: #2563eb;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <header class="gradient-bg text-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-bear text-3xl"></i>
+                    <h1 class="text-2xl font-bold">Descuentos Bear</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="{{ url_for('home') }}" class="hover:text-yellow-200 font-medium">Inicio</a>
+                    <a href="{{ url_for('ofertas') }}" class="hover:text-yellow-200 font-medium">Ofertas</a>
+                    <a href="{{ url_for('home') }}#asociados" class="hover:text-yellow-200 font-medium">Tiendas</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <button class="bg-white text-orange-500 px-4 py-2 rounded-full font-medium hover:bg-yellow-50">
+                        <i class="fas fa-user mr-2"></i>Ingresar
+                    </button>
+                    <button class="md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido del slide -->
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden slider-container relative">
+            <!-- Slides --> 
+            <div class="slide flex h-full " style="background-color: #4e98dd;"> 
+                <div class="w-1/2 p-10 flex flex-col justify-center">
+                    <p class="text-sm text-blue-600 mb-2">Lider lo tiene</p> <!-- Texto pequeño -->
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Aprovecha todo lo que tenemos para ti"</h2>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-48 transition duration-300">
+                        Ver ofertas
+                    </button>
+                </div>
+                <div class="w-1/2 flex items-center justify-center" style="background-color: #4e98dd;">
+                    <img src="https://placehold.co/400x300/CCCCCC/FFFFFF?text=Lider+Slide+1" alt="slide1" class="h-full object-contain">
+                </div>
+            </div>
+
+            <div class="slide flex h-full">
+                <div class="w-full h-full">
+                    <img src="https://placehold.co/400x300/CCCCCC/FFFFFF?text=Lider+Slide+2"
+                        alt="slide2"
+                        class="w-full h-full object-contain">
+                </div>
+            </div>
+
+
+            <div class="slide flex h-full">
+                <div class="w-1/2 p-10 flex flex-col justify-center">
+                    <p class="text-sm text-blue-600 mb-2">Lider lo tiene</p> <!-- Texto pequeño -->
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">AirPods Pro 2da Gen</h2>
+                    <p class="text-gray-600 mb-6">Audífonos inalámbricos con cancelación activa de ruido, calidad de sonido adaptativa y hasta 6 horas de batería. Compatible con todos tus dispositivos.</p>
+                    <div class="flex items-center mb-6">
+                        <span class="text-2xl font-bold text-blue-600">$299.990</span>
+                        <span class="ml-3 text-sm text-gray-500 line-through">$349.990</span>
+                        <span class="ml-3 bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">14% OFF</span>
+                    </div>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-48 transition duration-300">
+                        Comprar ahora
+                    </button>
+                </div>
+                <div class="w-1/2 bg-gray-100 flex items-center justify-center">
+                    <img src="https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MQD83?wid=1144&hei=1144&fmt=jpeg&qlt=90&.v=1660803972361" alt="AirPods Pro" class="h-full object-contain">
+                </div>
+            </div>
+
+            <div class="slide flex h-full">
+                    <div class="w-full h-full">
+                     <img src="https://placehold.co/400x300/CCCCCC/FFFFFF?text=Lider+Slide+5"
+                            alt="slide2"
+                            class="w-full h-full object-contain">
+                    </div>
+            </div>
+
+            <!-- Navigation arrows -->
+            <button id="prev" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 w-10 h-10 rounded-full flex items-center justify-center shadow-md z-10">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="next" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 w-10 h-10 rounded-full flex items-center justify-center shadow-md z-10">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <!-- Dots navigation -->
+            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                <div class="dot rounded-full bg-gray-300 cursor-pointer active"></div>
+                <div class="dot rounded-full bg-gray-300 cursor-pointer"></div>
+                <div class="dot rounded-full bg-gray-300 cursor-pointer"></div>
+                <div class="dot rounded-full bg-gray-300 cursor-pointer"></div>
+                <div class="dot rounded-full bg-gray-300 cursor-pointer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Título y descripción -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2 lider-blue">Ofertas Lider</h1>
+            <p class="text-gray-600">Aprovecha las mejores ofertas en productos de supermercado</p>
+        </div>
+
+        <!-- Filtros principales -->
+        <div class="mb-6">
+          <div class="flex flex-wrap gap-2">
+            <button class="filter-item active px-4 py-2 rounded-full border" data-category="Todas las ofertas">Todas las ofertas</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Abarrotes">Abarrotes</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Bebidas">Bebidas</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Lácteos">Lácteos</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Carnes">Carnes</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Frutas y Verduras">Frutas y Verduras</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Bebés">Bebés</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Mascotas">Mascotas</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Hogar">Hogar</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Ropa">Ropa</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Tecnología">Tecnología</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Juguetes">Juguetes</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="Farmacia">Farmacia</button>
+          </div>
+        </div>
+
+        <!-- Filtros secundarios -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Filtro por marca -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                    <select id="marca-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">Todas las marcas</option>
+                        <option value="colun">Colun</option>
+                        <option value="soprole">Soprole</option>
+                        <option value="nestle">Nestlé</option>
+                        <option value="lays">Lays</option>
+                        <option value="cocacola">Coca-Cola</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por precio -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                    <select id="precio-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">Cualquier precio</option>
+                        <option value="0-1000">Hasta $1.000</option>
+                        <option value="1000-3000">$1.000 - $3.000</option>
+                        <option value="3000-5000">$3.000 - $5.000</option>
+                        <option value="5000+">Más de $5.000</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por descuento -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descuento</label>
+                    <select id="descuento-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">Cualquier descuento</option>
+                        <option value="10">10% o más</option>
+                        <option value="20">20% o más</option>
+                        <option value="30">30% o más</option>
+                        <option value="40">40% o más</option>
+                        <option value="50">50% o más</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por orden -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+                    <select id="orden-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="recomendados">Recomendados</option>
+                        <option value="menor-precio">Menor precio</option>
+                        <option value="mayor-precio">Mayor precio</option>
+                        <option value="mayor-descuento">Mayor descuento</option>
+                        <option value="nombre-az">Nombre A-Z</option>
+                    </select>
+                </div>
+                 <!-- Botón para limpiar filtros -->
+                 <div class="col-span-full md:col-span-1 flex items-end justify-center md:justify-start">
+                    <button id="clear-filters" class="flex items-center justify-center bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md transition duration-300">
+                        <img src="https://placehold.co/24x24/CCCCCC/FFFFFF?text=X" alt="Limpiar filtros" class="w-6 h-6 mr-2">
+                        Limpiar filtros
+                    </button>
+                 </div>
+            </div>
+        </div>
+
+        <!-- Loading state -->
+        <div id="loading" class="hidden text-center py-8">
+            <div class="loading mx-auto"></div>
+            <p class="mt-2 text-gray-600">Buscando ofertas...</p>
+        </div>
+
+        <!-- Listado de productos -->
+        <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Los productos se cargarán aquí dinámicamente -->
+        </div>
+
+        <!-- Paginación -->
+        <div class="mt-10 flex justify-center">
+            <nav class="flex items-center space-x-2">
+                <button id="prev-page" class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="px-3 py-1 rounded border bg-blue-500 text-white page-btn active" data-page="1">1</button>
+                <button class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 page-btn" data-page="2">2</button>
+                <button class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 page-btn" data-page="3">3</button>
+                <button class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 page-btn" data-page="4">4</button>
+                <button class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 page-btn" data-page="5">5</button>
+                <button id="next-page" class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </nav>
+        </div>
+    </main>
+
+    <script>
+        let productos = [];
+        let filteredProducts = [];
+        let currentPage = 1;
+        const productsPerPage = 8;
+
+        // Cargar productos desde ofertas_lider.json
+        // NOTA IMPORTANTE: Esta URL asume que el archivo JSON está siendo servido por un servidor web
+        // en la ruta '/static/data/ofertas_lider.json'.
+        // Si abres este archivo HTML directamente desde tu sistema de archivos (file://),
+        // esta llamada fallará debido a restricciones de seguridad del navegador (CORS).
+        fetch('/static/data/ofertas_lider.json')
+            .then(res => {
+                if (!res.ok) {
+                    console.error('Error al cargar ofertas_lider.json: HTTP', res.status, res.statusText);
+                    throw new Error('Network response was not ok: ' + res.statusText);
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log('JSON cargado exitosamente. Cantidad de productos:', data.length);
+                if (!Array.isArray(data) || data.length === 0) {
+                    console.warn('El archivo JSON está vacío o no es un array. No se mostrarán productos.');
+                    productosContainer.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                            <h3 class="text-xl font-medium text-gray-700">No hay productos disponibles</h3>
+                            <p class="text-gray-500 mt-2">Asegúrate de que el archivo 'ofertas_lider.json' exista y contenga datos válidos.</p>
+                        </div>
+                    `;
+                    loadingElement.classList.add('hidden');
+                    return; // Salir si no hay datos
+                }
+
+                productos = data.map((item, index) => {
+                    const precioOferta = typeof item.precio_actual === 'string' 
+                        ? parseInt(item.precio_actual.replace(/\$|\./g, '')) 
+                        : (item.precio_actual || 0); // Asegurarse de que sea número o 0
+                    const precioOriginal = typeof item.precio_anterior === 'string' 
+                        ? parseInt(item.precio_anterior.replace(/\$|\./g, '')) 
+                        : (item.precio_anterior || precioOferta); // Asegurarse de que sea número o igual al de oferta
+
+                    let descuento = item.descuento;
+                    if (typeof descuento !== 'number' || isNaN(descuento)) {
+                        descuento = Math.max(0, Math.round((precioOriginal - precioOferta) / (precioOriginal || 1) * 100));
+                    }
+                    
+                    const imagenUrl = item.imagen || `https://placehold.co/200x200/CCCCCC/FFFFFF?text=${encodeURIComponent(item.nombre || 'Producto')}`;
+
+                    return {
+                        id: index + 1,
+                        nombre: item.nombre,
+                        descripcion: item.descripcion || item.nombre, // Asegurar que la descripción no esté vacía
+                        precioOriginal: precioOriginal,
+                        precioOferta: precioOferta,
+                        precioUnitario: precioOferta, // Puedes ajustar esto si "precioUnitario" es diferente
+                        descuento: descuento,
+                        marca: item.marca || "Desconocida", // Si tu script extrae la marca, la usará aquí
+                        categoria: item.categoria || "Todas las ofertas", // Asegurar que la categoría no esté vacía
+                        imagen: imagenUrl,
+                        link: item.link || "#"
+                    };
+                });
+                console.log('Productos procesados:', productos);
+                filteredProducts = [...productos];
+                renderProducts(filteredProducts, currentPage);
+            })
+            .catch(error => {
+                console.error("Error FATAL al cargar el archivo JSON de productos. No se mostrarán productos:", error);
+                productosContainer.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="fas fa-exclamation-circle text-4xl text-red-500 mb-4"></i>
+                        <h3 class="text-xl font-medium text-gray-700">Error al cargar productos</h3>
+                        <p class="text-gray-500 mt-2">Verifica que el archivo 'ofertas_lider.json' exista en la ruta correcta y que tu servidor web esté funcionando.</p>
+                        <p class="text-red-400 text-sm mt-2">Detalles del error: ${error.message}</p>
+                    </div>
+                `;
+                loadingElement.classList.add('hidden');
+            });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const dots = document.querySelectorAll('.dot');
+            const prevBtn = document.getElementById('prev');
+            const nextBtn = document.getElementById('next');
+            let currentIndex = 0;
+            let interval;
+
+            function showSlide(index) {
+                slides.forEach((slide, i) => {
+                    if (i === index) {
+                        slide.classList.add('active');
+                    } else {
+                        slide.classList.remove('active');
+                    }
+                });
+
+                dots.forEach((dot, i) => {
+                    if (i === index) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
+
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % slides.length;
+                showSlide(currentIndex);
+            }
+
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+                showSlide(currentIndex);
+            }
+
+            function startAutoSlide() {
+                interval = setInterval(nextSlide, 5000);
+            }
+
+            function resetAutoSlide() {
+                clearInterval(interval);
+                startAutoSlide();
+            }
+
+            nextBtn.addEventListener('click', () => {
+                nextSlide();
+                resetAutoSlide();
+            });
+
+            prevBtn.addEventListener('click', () => {
+                prevSlide();
+                resetAutoSlide();
+            });
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentIndex = index;
+                    showSlide(currentIndex);
+                    resetAutoSlide();
+                });
+            });
+
+            startAutoSlide();
+            showSlide(currentIndex);
+        });
+        
+
+        // Elementos del DOM 
+        const productosContainer = document.getElementById('productos-container');
+        const loadingElement = document.getElementById('loading');
+        const filterItems = document.querySelectorAll('.filter-item');
+        const marcaFilter = document.getElementById('marca-filter');
+        const precioFilter = document.getElementById('precio-filter');
+        const descuentoFilter = document.getElementById('descuento-filter');
+        const ordenFilter = document.getElementById('orden-filter');
+        const pageButtons = document.querySelectorAll('.page-btn');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const clearButton = document.getElementById('clear-filters'); 
+
+        // Función para formatear precios
+        function formatPrice(price) {
+            if (price === null || price === undefined) {
+                return ''; // Retorna vacío si el precio es nulo o indefinido
+            }
+            return '$' + price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        // Función para renderizar productos
+        function renderProducts(products, page) {
+            loadingElement.classList.remove('hidden');
+            productosContainer.innerHTML = '';
+            
+            setTimeout(() => {
+                const start = (page - 1) * productsPerPage;
+                const end = start + productsPerPage;
+                const paginatedProducts = products.slice(start, end);
+                
+                if (paginatedProducts.length === 0) {
+                    productosContainer.innerHTML = `
+                        <div class="col-span-full text-center py-12">
+                            <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+                            <h3 class="text-xl font-medium text-gray-700">No se encontraron productos</h3>
+                            <p class="text-gray-500 mt-2">Intenta con otros filtros</p>
+                        </div>
+                    `;
+                } else {
+                    paginatedProducts.forEach(producto => {
+                        const productCard = document.createElement('div');
+                        productCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden product-card transition duration-300 relative';
+
+                        // Asegurarse de que el descuento sea un número válido para mostrarlo
+                        const displayDescuento = producto.descuento > 0 ? `${producto.descuento}%` : '';
+                        const priceOriginalDisplay = producto.precioOriginal && producto.precioOriginal !== producto.precioOferta
+                            ? `<span class="text-gray-400 price-before text-sm mr-2">${formatPrice(producto.precioOriginal)}</span>`
+                            : '';
+                        
+                        productCard.innerHTML = `
+                            <!-- Badge de descuento (solo si hay descuento) -->
+                            ${displayDescuento ? `<span class="discount-badge absolute top-4 left-4 px-2 py-1 rounded text-xs font-bold z-10">${displayDescuento}</span>` : ''}
+                            
+                            <!-- Contenedor de imagen con fondo blanco -->
+                            <div class="bg-white p-4 border-b border-gray-100">
+                                <img src="${producto.imagen}" alt="${producto.nombre}" class="w-full h-48 object-contain mx-auto">
+                            </div>
+
+                            <!-- Contenido del producto -->
+                            <div class="p-4">
+                                <h3 class="font-bold text-lg text-gray-800 mb-2">${producto.nombre}</h3>
+                                <p class="text-gray-500 text-sm mb-3">${producto.descripcion}</p>
+
+                                <div class="flex items-center mb-2">
+                                    ${priceOriginalDisplay}
+                                    <span class="text-blue-600 font-bold text-lg">${formatPrice(producto.precioOferta)}</span>
+                                </div>
+
+                                <p class="text-gray-600 text-sm mb-4">${formatPrice(producto.precioUnitario)} x unidad</p>
+
+                                <button class="w-full lider-bg-blue text-white py-2 rounded-md hover:bg-blue-700 transition duration-300 add-to-cart" data-id="${producto.id}">
+                                    Agregar al carro
+                                </button>
+                            </div>
+                        `;
+
+                        productosContainer.appendChild(productCard);
+                    });
+                }
+
+                loadingElement.classList.add('hidden');
+
+                // Actualizar botones de paginación
+                updatePaginationButtons(products.length);
+            }, 500);
+
+        }
+
+        // Función para actualizar botones de paginación
+        function updatePaginationButtons(totalProducts) {
+            const totalPages = Math.ceil(totalProducts / productsPerPage);
+            
+            // Ocultar/mostrar botones de página según sea necesario
+            pageButtons.forEach(btn => {
+                const pageNum = parseInt(btn.dataset.page);
+                btn.classList.toggle('hidden', pageNum > totalPages);
+                
+                if (pageNum === currentPage) {
+                    btn.classList.add('bg-blue-500', 'text-white');
+                    btn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+                } else {
+                    btn.classList.remove('bg-blue-500', 'text-white');
+                    btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+                }
+            });
+            
+            // Deshabilitar botones de anterior/siguiente cuando corresponda
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+        }
+
+        // Función para filtrar productos
+        function filterProducts() {
+            const activeCategory = document.querySelector('.filter-item.active').dataset.category;
+            const marca = marcaFilter.value;
+            const precio = precioFilter.value;
+            const descuento = descuentoFilter.value;
+            const orden = ordenFilter.value;
+            
+            filteredProducts = productos.filter(producto => {
+                // Filtrar por categoría
+                if (activeCategory !== 'Todas las ofertas' && producto.categoria !== activeCategory) {
+                    return false;
+                }
+                
+                // Filtrar por marca
+                // Nota: Tu JSON de scraping actualmente no extrae la marca.
+                // Si la marca se extrajera, se agregaría a `product.marca`
+                // y se habilitaría este filtro. Por ahora, siempre será true si 'all'.
+                if (marca !== 'all' && producto.marca !== marca) {
+                    return false;
+                }
+                
+                // Filtrar por precio
+                if (precio !== 'all') {
+                    const [min, max] = precio.split('-').map(Number);
+                    if (precio === '5000+') {
+                        if (producto.precioOferta <= 5000) return false;
+                    } else if (max) {
+                        if (producto.precioOferta < min || producto.precioOferta > max) return false;
+                    } else { // Caso "0-1000" donde `max` es NaN
+                        if (producto.precioOferta > min) return false;
+                    }
+                }
+                
+                // Filtrar por descuento
+                if (descuento !== 'all' && producto.descuento < parseInt(descuento)) {
+                    return false;
+                }
+                
+                return true;
+            });
+            
+            // Ordenar productos
+            switch (orden) {
+                case 'menor-precio':
+                    filteredProducts.sort((a, b) => a.precioOferta - b.precioOferta);
+                    break;
+                case 'mayor-precio':
+                    filteredProducts.sort((a, b) => b.precioOferta - a.precioOferta);
+                    break;
+                case 'mayor-descuento':
+                    filteredProducts.sort((a, b) => b.descuento - a.descuento);
+                    break;
+                case 'nombre-az':
+                    filteredProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                    break;
+                default:
+                    // Recomendados (orden original si no hay otra especificada)
+                    break;
+            }
+            
+            currentPage = 1;
+            renderProducts(filteredProducts, currentPage);
+        }
+
+        // Event listeners
+        filterItems.forEach(item => {
+            item.addEventListener('click', () => {
+                filterItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                filterProducts();
+            });
+        });
+
+        [marcaFilter, precioFilter, descuentoFilter, ordenFilter].forEach(filter => {
+            filter.addEventListener('change', filterProducts);
+        });
+
+        pageButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentPage = parseInt(btn.dataset.page);
+                renderProducts(filteredProducts, currentPage);
+            });
+        });
+
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                renderProducts(filteredProducts, currentPage);
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderProducts(filteredProducts, currentPage);
+            }
+        });
+
+        // Event delegation para botones de agregar al carrito
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-to-cart')) {
+                const productId = parseInt(e.target.dataset.id);
+                const product = productos.find(p => p.id === productId);
+                console.log(`Agregado al carrito: ${product.nombre}`);
+                // Aquí iría la lógica real para agregar al carrito
+            }
+        });
+
+        // --- Lógica del botón de limpiar filtros ---
+        clearButton.addEventListener('click', () => {
+            // Restablecer filtros de categoría a "Todas las ofertas"
+            filterItems.forEach(item => item.classList.remove('active'));
+            document.querySelector('.filter-item[data-category="Todas las ofertas"]').classList.add('active');
+
+            // Restablecer selectores a su valor por defecto 'all' o 'recomendados'
+            marcaFilter.value = 'all';
+            precioFilter.value = 'all';
+            descuentoFilter.value = 'all';
+            ordenFilter.value = 'recomendados'; // El valor por defecto de orden
+
+            // Volver a aplicar los filtros para renderizar todos los productos sin filtros
+            filterProducts();
+        });
+
+        // Los productos se renderizarán una vez que se carguen los datos JSON (o se usen los de ejemplo)
+        // en el bloque fetch, así que no es necesario llamar a renderProducts aquí.
+
+    </script>
+    <!-- Footer -->
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-bear mr-2"></i> Descuentos Bear
+                    </h3>
+                    <p class="text-gray-400">Encuentra las mejores ofertas en supermercados chilenos y ahorra en tus compras diarias.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Enlaces útiles</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Preguntas frecuentes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Cómo funciona</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Términos y condiciones</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Política de privacidad</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contáctanos</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Supermercados</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/jumbo" class="text-gray-400 hover:text-white">Jumbo</a></li>
+                        <li><a href="/lider" class="text-gray-400 hover:text-white">Lider</a></li>
+                        <li><a href="/santaisabel" class="text-gray-400 hover:text-white">Santa Isabel</a></li>
+                        <li><a href="/unimarc" class="text-gray-400 hover:text-white">Unimarc</a></li>
+                        <li><a href="/alvi" class="text-gray-400 hover:text-white">Alvi</a></li>
+                        <li><a href="/tottus" class="text-gray-400 hover:text-white">Tottus</a></li>
+                    </ul>
+                </div>
+                
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 Descuentos Bear. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

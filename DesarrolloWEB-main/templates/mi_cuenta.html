@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Cuenta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Define la fuente Inter si no está ya en tu configuración global de Tailwind u otros estilos */
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full text-center">
+        <h1 class="text-4xl font-bold text-blue-400 mb-4">Mi Cuenta</h1>
+        <p class="text-lg text-gray-300 mb-6">¡Hola, <span class="font-semibold text-blue-200">{{ username }}</span>!</p>
+        <p class="text-gray-400 mb-8">Aquí podrás ver y gestionar la información de tu cuenta.</p>
+
+        <div class="space-y-4">
+            <button onclick="window.location.href='/'" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md">
+                <i class="fas fa-home mr-2"></i> Ir a Inicio
+            </button>
+            <form id="logout-form" class="w-full">
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Cerrar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Manejador de eventos para el formulario de cerrar sesión
+        const logoutForm = document.getElementById('logout-form');
+
+        if (logoutForm) { // Solo si el formulario de logout existe en la página
+            logoutForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Previene el envío por defecto del formulario
+
+                try {
+                    // Envía una solicitud POST al endpoint de logout de Flask
+                    const response = await fetch('/api/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json(); // Parsea la respuesta JSON del servidor
+                    if (response.ok && data.success) {
+                        // MODIFICACIÓN: Redirige al usuario a la página de inicio (home)
+                        window.location.href = '/'; 
+                    } else {
+                        // Si hay un error, lo muestra en la consola y al usuario
+                        console.error('Error al cerrar sesión:', data.message);
+                        // Puedes reemplazar 'alert' con un modal personalizado si prefieres
+                        alert('No se pudo cerrar la sesión. Inténtalo de nuevo.');
+                    }
+                } catch (error) {
+                    // Maneja errores de conexión o de red
+                    console.error('Error de red al cerrar sesión:', error);
+                    alert('Error de conexión al intentar cerrar sesión.');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

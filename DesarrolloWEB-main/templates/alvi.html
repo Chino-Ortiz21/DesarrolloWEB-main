@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ofertas Alvi - Supermercado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Colores corporativos de Alvi (amarillo y azul) */
+        :root {
+            --alvi-primary-yellow: #FFC107; /* Amarillo principal de Alvi (Amber 700) */
+            --alvi-secondary-blue: #0F2E64; /* Azul oscuro/marino de Alvi */
+            --alvi-text-dark: #333333; /* Texto principal oscuro */
+            --alvi-text-gray: #666666; /* Texto secundario gris */
+            --alvi-light-bg: #F8F8F8; /* Fondo claro para secciones */
+            --alvi-border-light: #E0E0E0; /* Bordes claros */
+        }
+
+        /* Fondo degradado del encabezado (general del sitio) */
+        .gradient-bg {
+            background: linear-gradient(135deg, #370dce 0%, #fda085 100%);
+        }
+        
+        /* Ajustes para usar los colores de Alvi */
+        .alvi-yellow { 
+            color: var(--alvi-primary-yellow);
+        }
+
+        .alvi-blue {
+            color: var(--alvi-secondary-blue);
+        }
+        
+        .alvi-bg-yellow { 
+            background-color: var(--alvi-primary-yellow);
+            color: var(--alvi-secondary-blue); /* Texto azul oscuro sobre el fondo amarillo */
+        }
+
+        .alvi-bg-blue {
+            background-color: var(--alvi-secondary-blue);
+            color: white; /* Texto blanco sobre el fondo azul */
+        }
+        
+        .filter-item {
+            border-color: var(--alvi-border-light); 
+            color: var(--alvi-text-dark);
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+
+        .filter-item:hover {
+            color: white; /* Color de texto blanco al pasar el ratón */
+            border-color: var(--alvi-secondary-blue); /* Borde azul en hover */
+            background-color: var(--alvi-secondary-blue); /* Fondo azul en hover */
+        }
+        
+        .filter-item.active {
+            background-color: var(--alvi-secondary-blue); /* Azul cuando está activo */
+            color: white;
+            border-color: var(--alvi-secondary-blue);
+            font-weight: 600;
+        }
+        
+        .product-card {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        .discount-badge {
+            background-color: #ffd700; /* Color oro para el badge de descuento (se mantiene) */
+            color: black;
+            font-weight: bold;
+        }
+        
+        .price-before {
+            text-decoration: line-through;
+            color: var(--alvi-text-gray); 
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(15, 46, 100, 0.3); /* Loader con colores Alvi (azul) */
+            border-radius: 50%;
+            border-top-color: var(--alvi-secondary-blue); 
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Ajustes para los selectores de filtros */
+        .focus\:ring-alvi:focus { /* Nuevo nombre de clase para el focus ring */
+            --tw-ring-color: var(--alvi-secondary-blue); /* Usar el azul secundario para el focus ring */
+        }
+
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-md">
+        <div class="container mx-auto px-4">
+             <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-bear text-3xl"></i>
+                    <h1 class="text-2xl font-bold">Descuentos Bear</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="/" class="hover:text-yellow-200 font-medium">Inicio</a>
+                    <a href="/ofertas" class="hover:text-yellow-200 font-medium">Ofertas</a>
+                    <a href="/#asociados" class="hover:text-yellow-200 font-medium">Tiendas</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <!-- Contenedor para el estado de la sesión y botones de acción -->
+                    {% if username and username != 'Invitado' %}
+                    <a href="/mi_cuenta" class="hidden md:block bg-white text-orange-500 px-4 py-2 rounded-full font-medium hover:bg-yellow-50 transition-colors duration-200">
+                        Mi Cuenta
+                    </a>
+                    {% else %}
+                    <a href="/login" class="hidden md:block bg-white text-orange-500 px-4 py-2 rounded-full font-medium hover:bg-yellow-50 transition-colors duration-200">
+                        Iniciar Sesión
+                    </a>
+                    {% endif %}
+                    <button id="mobile-menu-button" class="md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+             <!-- Mobile Menu Panel -->
+            <div id="mobile-menu" class="hidden md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="/" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-800 hover:bg-opacity-50">Inicio</a>
+                    <a href="/ofertas" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-800 hover:bg-opacity-50">Ofertas</a>
+                    <a href="/#asociados" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-800 hover:bg-opacity-50">Tiendas</a>
+                    <div class="border-t border-white/20 my-2"></div>
+                     {% if username and username != 'Invitado' %}
+                        <a href="/mi_cuenta" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-800 hover:bg-opacity-50">Mi Cuenta</a>
+                    {% else %}
+                        <a href="/login" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-blue-800 hover:bg-opacity-50">Iniciar Sesión</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section para Alvi -->
+    <section class="alvi-bg-yellow text-alvi-blue py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center justify-center">
+                <div class="md:w-1/2 mb-8 md:mb-0 text-center">
+                    <img src="static/img/alvi-logo.png" alt="Alvi Logo" class="mx-auto h-24 mb-4 object-contain">
+                    <h2 class="text-4xl font-bold mb-4">¡Las Mejores Ofertas Mayoristas de Alvi!</h2>
+                    <p class="text-xl mb-6">Encuentra grandes descuentos en productos al por mayor y para tu negocio.</p>
+                    <a href="#productos-container" class="alvi-bg-blue text-white px-8 py-3 rounded-full font-bold text-lg hover:opacity-90 transition duration-300">
+                        Ver Ofertas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <!-- Título y descripción -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2 alvi-blue">Ofertas Alvi</h1>
+            <p class="text-gray-600">Aprovecha las mejores ofertas mayoristas y de volumen.</p>
+        </div>
+
+        <!-- Filtros principales -->
+        <div class="mb-6">
+          <div class="flex flex-wrap gap-2">
+            <button class="filter-item active px-4 py-2 rounded-full border" data-category="all">Todas las ofertas</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="abarrotes">Abarrotes</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="bebidas">Bebidas</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="lacteos">Lácteos</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="carnes">Carnes</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="frutas-verduras">Frutas y Verduras</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="bebes">Bebés</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="mascotas">Mascotas</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="hogar">Hogar</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="ropa">Ropa</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="tecnologia">Tecnología</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="juguetes">Juguetes</button>
+            <button class="filter-item px-4 py-2 rounded-full border" data-category="farmacia">Farmacia</button>
+            <button id="clear-filters-btn" class="px-4 py-2 rounded-full border bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-300">
+                Limpiar filtros
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtros secundarios -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Filtro por marca -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                    <select id="marca-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-alvi">
+                        <option value="all">Todas las marcas</option>
+                        <!-- Las opciones de marca se cargarán dinámicamente aquí -->
+                    </select>
+                </div>
+                
+                <!-- Filtro por precio -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                    <select id="precio-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-alvi">
+                        <option value="all">Cualquier precio</option>
+                        <option value="0-1000">Hasta $1.000</option>
+                        <option value="1000-3000">$1.000 - $3.000</option>
+                        <option value="3000-5000">$3.000 - $5.000</option>
+                        <option value="5000+">Más de $5.000</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por descuento -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descuento</label>
+                    <select id="descuento-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-alvi">
+                        <option value="all">Cualquier descuento</option>
+                        <option value="10">10% o más</option>
+                        <option value="20">20% o más</option>
+                        <option value="30">30% o más</option>
+                        <option value="40">40% o más</option>
+                        <option value="50">50% o más</option>
+                    </select>
+                </div>
+                
+                <!-- Filtro por orden -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+                    <select id="orden-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-alvi">
+                        <option value="recomendados">Recomendados</option>
+                        <option value="menor-precio">Menor precio</option>
+                        <option value="mayor-precio">Mayor precio</option>
+                        <option value="mayor-descuento">Mayor descuento</option>
+                        <option value="nombre-az">Nombre A-Z</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading state -->
+        <div id="loading" class="hidden text-center py-8">
+            <div class="loading mx-auto"></div>
+            <p class="mt-2 text-gray-600">Buscando ofertas...</p>
+        </div>
+
+        <!-- Listado de productos -->
+        <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Los productos se cargarán aquí dinámicamente -->
+        </div>
+
+        <!-- Paginación -->
+        <div class="mt-10 flex justify-center">
+            <nav class="flex items-center space-x-2" id="pagination-nav">
+                <button id="prev-page" class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div id="page-buttons" class="flex space-x-2">
+                    <!-- Los botones numéricos de paginación se generarán dinámicamente aquí -->
+                </div>
+                <button id="next-page" class="px-3 py-1 rounded border text-gray-600 hover:bg-gray-100">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </nav>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-bear mr-2"></i> Descuentos Bear
+                    </h3>
+                    <p class="text-gray-400">Encuentra las mejores ofertas en supermercados chilenos y ahorra en tus compras diarias.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Enlaces útiles</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Preguntas frecuentes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Cómo funciona</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Términos y condiciones</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Política de privacidad</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contáctanos</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Supermercados</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/jumbo" class="text-gray-400 hover:text-white">Jumbo</a></li>
+                        <li><a href="/lider" class="text-gray-400 hover:text-white">Lider</a></li>
+                        <li><a href="/santaisabel" class="text-gray-400 hover:text-white">Santa Isabel</a></li>
+                        <li><a href="/unimarc" class="text-gray-400 hover:text-white">Unimarc</a></li>
+                        <li><a href="/alvi" class="text-gray-400 hover:text-white">Alvi</a></li>
+                        <li><a href="/tottus" class="text-gray-400 hover:text-white">Tottus</a></li>
+                    </ul>
+                </div>
+                
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 Descuentos Bear. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Datos de productos (ahora se cargarán desde un JSON)
+            let allProducts = []; 
+            let filteredProducts = [];
+
+            // Variables de estado de paginación
+            let currentPage = 1;
+            const productsPerPage = 8; // Define cuántos productos se muestran por página
+
+            // Elementos del DOM
+            const productosContainer = document.getElementById('productos-container');
+            const loadingElement = document.getElementById('loading');
+            const filterItems = document.querySelectorAll('.filter-item');
+            const marcaFilter = document.getElementById('marca-filter');
+            const precioFilter = document.getElementById('precio-filter');
+            const descuentoFilter = document.getElementById('descuento-filter');
+            const ordenFilter = document.getElementById('orden-filter');
+            const pageButtonsContainer = document.getElementById('page-buttons'); // Nuevo contenedor para los números de página
+            const prevPageBtn = document.getElementById('prev-page');
+            const nextPageBtn = document.getElementById('next-page');
+            const clearFiltersBtn = document.getElementById('clear-filters-btn');
+
+            // --- NO SLIDER LOGIC HERE ---
+
+
+            // Función auxiliar para parsear precios de cadena a número
+            function parsePrice(priceString) {
+                if (typeof priceString !== 'string' || priceString === "N/A") {
+                    return NaN; // Usar NaN para indicar un precio no válido
+                }
+                // Eliminar "$", ".", y "c/u", luego convertir a flotante (para mantener decimales si los hubiera, aunque los precios chilenos suelen ser enteros)
+                const cleaned_price = priceString.replace('$', '').replace(/\./g, '').replace(' c/u', '').trim();
+                return parseFloat(cleaned_price);
+            }
+
+            // Función auxiliar para formatear precios a CLP (toma un número y devuelve una cadena formateada)
+            function formatPrice(priceNum) {
+                if (priceNum === null || isNaN(priceNum)) {
+                    return "N/A";
+                }
+                // Formatear a moneda de Peso Chileno, sin decimales
+                return `$${priceNum.toLocaleString('es-CL', { maximumFractionDigits: 0 })}`;
+            }
+
+            // Función para calcular el porcentaje de descuento
+            function calculateDiscount(originalPrice, offerPrice) {
+                const originalVal = parsePrice(originalPrice);
+                const offerVal = parsePrice(offerPrice);
+                if (!isNaN(originalVal) && !isNaN(offerVal) && originalVal > offerVal && originalVal > 0) {
+                    return Math.round(((originalVal - offerVal) / originalVal) * 100);
+                }
+                return 0; // Si no hay descuento o los precios no son válidos
+            }
+
+            // Función para renderizar productos
+            function renderProducts(products, page) {
+                loadingElement.classList.remove('hidden');
+                productosContainer.innerHTML = ''; // Limpia el contenido actual
+
+                setTimeout(() => {
+                    const start = (page - 1) * productsPerPage;
+                    const end = start + productsPerPage;
+                    const paginatedProducts = products.slice(start, end);
+                    
+                    if (paginatedProducts.length === 0) {
+                        productosContainer.innerHTML = `
+                            <div class="col-span-full text-center py-12">
+                                <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+                                <h3 class="text-xl font-medium text-gray-700">No se encontraron productos</h3>
+                                <p class="text-gray-500 mt-2">Intenta con otros filtros</p>
+                            </div>
+                        `;
+                    } else {
+                        paginatedProducts.forEach(producto => {
+                            // Extract prices for 1 and 2 units, and the regular price
+                            let price1Unit = null;
+                            let savings1Unit = null;
+                            let price2Unit = null;
+                            let savings2Unit = null;
+
+                            // Sort prices by quantity_minima ascending for easier access
+                            const sortedPricesByQuantity = producto.precios_por_cantidad ? [...producto.precios_por_cantidad].sort((a, b) => a.cantidad_minima - b.cantidad_minima) : [];
+
+                            for (const priceOption of sortedPricesByQuantity) {
+                                if (priceOption.cantidad_minima === 1) {
+                                    price1Unit = priceOption.precio_unitario;
+                                    savings1Unit = priceOption.ahorro_porcentaje;
+                                } else if (priceOption.cantidad_minima === 2) {
+                                    price2Unit = priceOption.precio_unitario;
+                                    savings2Unit = priceOption.ahorro_porcentaje;
+                                }
+                            }
+
+                            // Determine the main discount for the top-left badge
+                            const mainDiscount = producto.descuento; // Using producto.descuento directly as per JSON
+
+                            const productCard = document.createElement('div');
+                            productCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden product-card transition duration-300';
+                            productCard.innerHTML = `
+                                <div class="relative p-4 pb-0">
+                                    ${mainDiscount > 0 ? `<span class="discount-badge absolute top-4 left-4 px-2 py-1 rounded text-xs font-bold">-${mainDiscount}%</span>` : ''}
+                                    <a href="${producto.url_producto || '#'}" target="_blank" rel="noopener noreferrer" class="block">
+                                        <img src="${producto.imagen}" alt="${producto.nombre}" class="w-full h-48 object-contain mx-auto" onerror="this.onerror=null;this.src='https://placehold.co/200x200/eee/ccc?text=Imagen+No+Disponible';">
+                                    </a>
+                                </div>
+                                <div class="p-4 border-t">
+                                    <h3 class="font-bold text-lg mb-1 h-14 overflow-hidden">${producto.nombre}</h3>
+                                    <p class="text-gray-500 text-sm mb-3">${producto.marca || 'Marca desconocida'}</p>
+
+                                    <!-- Prices by Quantity -->
+                                    <div class="space-y-1 mb-3">
+                                        ${price2Unit ? `
+                                            <div class="flex items-center justify-between text-sm">
+                                                <span class="text-gray-600">Desde 2 un</span>
+                                                <div class="flex items-center">
+                                                    <span class="font-bold alvi-blue">${formatPrice(parsePrice(price2Unit))} c/u</span>
+                                                    ${savings2Unit > 0 ? `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded ml-2">Ahorra ${savings2Unit}%</span>` : ''}
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                        ${price1Unit ? `
+                                            <div class="flex items-center justify-between text-sm">
+                                                <span class="text-gray-600">Desde 1 un</span>
+                                                <div class="flex items-center">
+                                                    <span class="font-bold alvi-blue">${formatPrice(parsePrice(price1Unit))} c/u</span>
+                                                    ${savings1Unit > 0 ? `<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded ml-2">Ahorra ${savings1Unit}%</span>` : ''}
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+
+                                    <!-- Regular Price -->
+                                    ${producto.precio_regular_display && parsePrice(producto.precio_regular_display) > 0 ? `
+                                        <div class="flex justify-between items-center text-gray-700 text-sm mt-2 pt-2 border-t border-gray-100">
+                                            <span>Precio regular</span>
+                                            <span class="font-bold">${formatPrice(parsePrice(producto.precio_regular_display))} c/u</span>
+                                        </div>
+                                    ` : ''}
+                                    
+                                    <button class="w-full alvi-bg-blue text-white py-2 rounded-md hover:opacity-90 transition duration-300 mt-4" onclick="window.open('${producto.url_producto || '#'}', '_blank')">
+                                        Ver producto
+                                    </button>
+                                </div>
+                            `;
+                            productosContainer.appendChild(productCard);
+                        });
+                    }
+                    
+                    loadingElement.classList.add('hidden');
+                    updatePaginationButtons(products.length);
+                }, 500);
+            }
+
+            // Función para actualizar botones de paginación
+            function updatePaginationButtons(totalProducts) {
+                const totalPages = Math.ceil(totalProducts / productsPerPage);
+                
+                pageButtonsContainer.innerHTML = ''; // Limpiar los botones numéricos existentes
+
+                const maxButtons = 7; // Número máximo de botones a mostrar
+                let startPage, endPage;
+
+                if (totalPages <= maxButtons) {
+                    startPage = 1;
+                    endPage = totalPages;
+                } else {
+                    if (currentPage <= 4) { 
+                        startPage = 1;
+                        endPage = 5;
+                    } else if (currentPage + 3 >= totalPages) {
+                        startPage = totalPages - 4;
+                        endPage = totalPages;
+                    } else { 
+                        startPage = currentPage - 2;
+                        endPage = currentPage + 2;
+                    }
+                }
+
+                if (startPage > 1) {
+                    const button = document.createElement('button');
+                    button.textContent = '1';
+                    button.dataset.page = 1;
+                    button.className = `px-3 py-1 rounded border text-sm page-btn bg-white text-gray-600 hover:bg-gray-100`;
+                    button.addEventListener('click', () => { currentPage = 1; renderProducts(filteredProducts, currentPage); });
+                    pageButtonsContainer.appendChild(button);
+                    if (startPage > 2) {
+                        const dots = document.createElement('span');
+                        dots.textContent = '...';
+                        dots.className = 'px-1 py-1 text-gray-600';
+                        pageButtonsContainer.appendChild(dots);
+                    }
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    const button = document.createElement('button');
+                    button.textContent = i;
+                    button.dataset.page = i;
+                    button.className = `px-3 py-1 rounded border text-sm page-btn ${
+                        i === currentPage ? 'alvi-bg-blue text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
+                    }`;
+                    button.addEventListener('click', (e) => {
+                        currentPage = parseInt(e.target.dataset.page);
+                        renderProducts(filteredProducts, currentPage);
+                    });
+                    pageButtonsContainer.appendChild(button);
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) {
+                        const dots = document.createElement('span');
+                        dots.textContent = '...';
+                        dots.className = 'px-1 py-1 text-gray-600';
+                        pageButtonsContainer.appendChild(dots);
+                    }
+                    const button = document.createElement('button');
+                    button.textContent = totalPages;
+                    button.dataset.page = totalPages;
+                    button.className = `px-3 py-1 rounded border text-sm page-btn bg-white text-gray-600 hover:bg-gray-100`;
+                    button.addEventListener('click', () => { currentPage = totalPages; renderProducts(filteredProducts, currentPage); });
+                    pageButtonsContainer.appendChild(button);
+                }
+                
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+                
+                if (prevPageBtn.disabled) {
+                    prevPageBtn.classList.add('text-gray-400', 'bg-gray-200', 'cursor-not-allowed');
+                    prevPageBtn.classList.remove('hover:bg-gray-100');
+                } else {
+                    prevPageBtn.classList.remove('text-gray-400', 'bg-gray-200', 'cursor-not-allowed');
+                    prevPageBtn.classList.add('hover:bg-gray-100');
+                }
+
+                if (nextPageBtn.disabled) {
+                    nextPageBtn.classList.add('text-gray-400', 'bg-gray-200', 'cursor-not-allowed');
+                    nextPageBtn.classList.remove('hover:bg-gray-100');
+                } else {
+                    nextPageBtn.classList.remove('text-gray-400', 'bg-gray-200', 'cursor-not-allowed');
+                    nextPageBtn.classList.add('hover:bg-gray-100');
+                }
+            }
+
+            // Función para aplicar filtros y renderizar productos
+            function applyFiltersAndRender() {
+                let tempProducts = [...allProducts]; 
+
+                const activeCategoryElement = document.querySelector('.filter-item.active');
+                const activeCategory = activeCategoryElement ? activeCategoryElement.dataset.category : 'all';
+                const marca = marcaFilter.value;
+                const precio = precioFilter.value;
+                const descuento = descuentoFilter.value;
+                const orden = ordenFilter.value;
+                
+                if (activeCategory !== 'all') {
+                    tempProducts = tempProducts.filter(p => 
+                        p.categoria && p.categoria.toLowerCase().replace(/\s/g, '').replace(/\//g, '-') === activeCategory.replace(/\s/g, '')
+                    );
+                }
+
+                if (marca !== 'all') {
+                    tempProducts = tempProducts.filter(p => p.marca && p.marca.toLowerCase() === marca.toLowerCase());
+                }
+
+                if (precio !== 'all') {
+                    tempProducts = tempProducts.filter(p => {
+                        // For quantity-based pricing, find the *lowest* unit price to filter by overall price range
+                        const lowestPriceOption = p.precios_por_cantidad && p.precios_por_cantidad.length > 0
+                            ? p.precios_por_cantidad.reduce((min, current) => 
+                                parsePrice(current.precio_unitario) < parsePrice(min.precio_unitario) ? current : min
+                            )
+                            : null;
+                        
+                        const offerPrice = lowestPriceOption ? parsePrice(lowestPriceOption.precio_unitario) : parsePrice(p.precio_oferta_mapped);
+                        
+                        if (isNaN(offerPrice)) return false; 
+
+                        const [min, max] = precio.split('-').map(Number);
+                        if (precio.endsWith('+')) {
+                            return offerPrice >= min;
+                        } else if (max) {
+                            return offerPrice >= min && offerPrice <= max;
+                        } else {
+                            return offerPrice <= min;
+                        }
+                    });
+                }
+                
+                if (descuento !== 'all') {
+                    const minDiscount = parseInt(descuento);
+                    tempProducts = tempProducts.filter(p => {
+                        // Use the main 'descuento' field for this filter
+                        return p.descuento >= minDiscount;
+                    });
+                }
+
+                switch (orden) {
+                    case 'menor-precio':
+                        // Sort by the lowest unit price available in precios_por_cantidad, or main offer price
+                        tempProducts.sort((a, b) => {
+                            const priceA = a.precios_por_cantidad && a.precios_por_cantidad.length > 0
+                                ? parsePrice(a.precios_por_cantidad.reduce((min, current) => parsePrice(current.precio_unitario) < parsePrice(min.precio_unitario) ? current : min).precio_unitario)
+                                : parsePrice(a.precio_oferta_mapped);
+                            const priceB = b.precios_por_cantidad && b.precios_por_cantidad.length > 0
+                                ? parsePrice(b.precios_por_cantidad.reduce((min, current) => parsePrice(current.precio_unitario) < parsePrice(min.precio_unitario) ? current : min).precio_unitario)
+                                : parsePrice(b.precio_oferta_mapped);
+                            return (isNaN(priceA) ? Infinity : priceA) - (isNaN(priceB) ? Infinity : priceB);
+                        });
+                        break;
+                    case 'mayor-precio':
+                        // Sort by the highest unit price available in precios_por_cantidad, or main offer price
+                        tempProducts.sort((a, b) => {
+                            const priceA = a.precios_por_cantidad && a.precios_por_cantidad.length > 0
+                                ? parsePrice(a.precios_por_cantidad.reduce((max, current) => parsePrice(current.precio_unitario) > parsePrice(max.precio_unitario) ? current : max).precio_unitario)
+                                : parsePrice(a.precio_oferta_mapped);
+                            const priceB = b.precios_por_cantidad && b.precios_por_cantidad.length > 0
+                                ? parsePrice(b.precios_por_cantidad.reduce((max, current) => parsePrice(current.precio_unitario) > parsePrice(max.precio_unitario) ? current : max).precio_unitario)
+                                : parsePrice(b.precio_oferta_mapped);
+                            return (isNaN(priceB) ? -Infinity : priceB) - (isNaN(priceA) ? -Infinity : priceA);
+                        });
+                        break;
+                    case 'mayor-descuento':
+                        tempProducts.sort((a, b) => b.descuento - a.descuento);
+                        break;
+                    case 'nombre-az':
+                        tempProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                        break;
+                    default:
+                        break;
+                }
+
+                filteredProducts = tempProducts;
+                currentPage = 1;
+                renderProducts(filteredProducts, currentPage);
+            }
+
+            // Función para limpiar todos los filtros
+            function clearAllFilters() {
+                filterItems.forEach(item => item.classList.remove('active'));
+                document.querySelector('.filter-item[data-category="all"]').classList.add('active');
+                marcaFilter.value = 'all';
+                precioFilter.value = 'all';
+                descuentoFilter.value = 'all';
+                ordenFilter.value = 'recomendados';
+                applyFiltersAndRender();
+            }
+
+            // Event listeners
+            filterItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    filterItems.forEach(i => i.classList.remove('active', 'alvi-bg-blue', 'text-white')); // Remove Alvi colors from others
+                    item.classList.add('active', 'alvi-bg-blue', 'text-white'); // Add Alvi colors to active
+                    applyFiltersAndRender();
+                });
+            });
+
+            [marcaFilter, precioFilter, descuentoFilter, ordenFilter].forEach(filter => {
+                filter.addEventListener('change', () => { 
+                    currentPage = 1; 
+                    applyFiltersAndRender(); 
+                });
+            });
+
+            clearFiltersBtn.addEventListener('click', clearAllFilters);
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderProducts(filteredProducts, currentPage);
+                }
+            });
+            nextPageBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderProducts(filteredProducts, currentPage);
+                }
+            });
+
+            async function loadProducts() {
+                try {
+                    const response = await fetch('static/data/productos_alvi.json'); 
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`Error al cargar el JSON: HTTP status ${response.status} - ${response.statusText}. Respuesta del servidor: ${errorText}`);
+                        throw new Error(`HTTP error! status: ${response.status}. Por favor, verifica la ruta y que el servidor Flask esté corriendo.`);
+                    }
+                    const data = await response.json();
+                    allProducts = data.map(p => ({
+                        nombre: p.nombre || "Producto sin nombre",
+                        descripcion: p.descripcion || "", // Keep description if needed elsewhere, but it's removed from card display
+                        precio_oferta_mapped: p.precio_oferta !== undefined ? String(p.precio_oferta) : 'N/A', // Mapeo para precio_oferta
+                        precio_regular_display: p.precio_original !== undefined ? String(p.precio_original) : 'N/A', // Mapeo para precio_original
+                        descuento: p.descuento || 0, // Porcentaje de descuento general del producto
+                        precios_por_cantidad: p.precios_por_cantidad || [], // Mantener el array de precios por cantidad
+                        marca: (p.marca || "sin marca").toLowerCase(),
+                        categoria: p.categoria ? p.categoria.toLowerCase().replace(/\s/g, '-').replace(/\//g, '-') : "otros",
+                        imagen: p.imagen || 'https://placehold.co/200x200/eee/ccc?text=Imagen+no+disponible',
+                        url_producto: p.url_producto || '#', 
+                    }));
+                    
+                    const uniqueBrands = [...new Set(allProducts.map(p => p.marca ? p.marca.trim().toLowerCase() : ''))]
+                                                .filter(brand => brand && brand !== 'n/a' && brand !== '')
+                                                .sort((a, b) => a.localeCompare(b));
+                                                
+                    marcaFilter.innerHTML = '<option value="all">Todas las marcas</option>';
+                    uniqueBrands.forEach(brand => {
+                        const option = document.createElement('option');
+                        option.value = brand;
+                        option.textContent = brand.charAt(0).toUpperCase() + brand.slice(1);
+                        marcaFilter.appendChild(option);
+                    });
+
+                    applyFiltersAndRender(); // Apply filters and render products initially
+                } catch (error) {
+                    console.error("Error al cargar los productos:", error);
+                    loadingElement.classList.add('hidden'); 
+                    productosContainer.innerHTML = `
+                        <div class="col-span-full text-center py-12 bg-red-50 rounded-lg border border-red-200">
+                            <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                            <h3 class="text-xl font-medium text-red-800">Error al cargar productos</h3>
+                            <p class="text-red-600 mt-2">
+                                No se pudo cargar el archivo de productos. Por favor, asegúrate de que <code>productos_alvi.json</code>
+                                existe en la ruta <code>static/data/</code> dentro de tu proyecto Flask y que el servidor está corriendo.
+                            </p>
+                            <p class="text-red-600 mt-2">Detalles del error: ${error.message}</p>
+                        </div>`;
+                }
+            }
+            // renderDynamicProductSlides(); // Removed as the slider section is removed
+            loadProducts(); // Call the product loading function
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descuentos Bear - Ofertas Tottus</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Header and Footer styles */
+        .gradient-bg {
+            background: linear-gradient(135deg, #370dce 0%, #fda085 100%);
+        }
+
+        /* Tottus branding for MAIN CONTENT ONLY */
+        .tottus-blue-text {
+            color: #004B8E; /* Tottus Blue */
+        }
+        .tottus-blue-bg {
+            background-color: #004B8E; /* Tottus Blue */
+        }
+        .tottus-orange-bg {
+            background-color: #FF9900; /* Tottus Orange for accents */
+        }
+        .tottus-blue-border {
+            border-color: #004B8E; /* Tottus Blue */
+        }
+        
+        .filter-item:hover {
+            color: #004B8E; /* Tottus Blue */
+            border-color: #004B8E; /* Tottus Blue */
+        }
+        
+        .filter-item.active {
+            background-color: #004B8E; /* Tottus Blue */
+            color: white;
+            border-color: #004B8E; /* Tottus Blue */
+        }
+        
+        .product-card {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Using Tottus orange for the discount badge for better contrast */
+        .discount-badge {
+            background-color: #FF9900; /* Tottus Orange */
+            color: white;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .price-before { text-decoration: line-through; }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 75, 142, 0.3); /* Tottus Blue with transparency */
+            border-radius: 50%;
+            border-top-color: #004B8E; /* Tottus Blue */
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        /* Slider specific styles */
+        .slider-container {
+            height: 336px; /* Adjusted height for the slider based on 1920x560 aspect ratio (1152 / (1920/560) = 336) */
+            overflow: hidden; /* Hide overflowing content */
+            position: relative;
+        }
+
+        .slides-wrapper {
+            display: flex; /* Arrange slides in a row */
+            height: 100%;
+            transition: transform 0.5s ease-in-out; /* Smooth transition for slides */
+        }
+        
+        .slides-wrapper .slide {
+            flex-shrink: 0; /* Prevent slides from shrinking */
+            width: 100%; /* Each slide takes full width of the container */
+            height: 100%;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            transition: all 0.3s ease;
+        }
+        .dot.active {
+            width: 30px;
+            background-color: #004B8E; /* Tottus Blue */
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+  <header class="gradient-bg text-white shadow-md">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-bear text-3xl"></i>
+                    <h1 class="text-2xl font-bold">Descuentos Bear</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <!-- RUTAS PARA FLASK: RESTAURADAS -->
+                    <a href="{{ url_for('home') }}" class="hover:text-yellow-200 font-medium">Inicio</a>
+                    <a href="{{ url_for('ofertas') }}" class="hover:text-yellow-200 font-medium">Ofertas</a>
+                    <a href="{{ url_for('home') }}#asociados" class="hover:text-yellow-200 font-medium">Tiendas</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <!-- LÓGICA DE SESIÓN IMPLEMENTADA -->
+                    {% if username and username != 'Invitado' %}
+                        <!-- Si el usuario está logueado, muestra el botón 'Mi Cuenta' -->
+                        <a href="{{ url_for('mi_cuenta') }}" class="hidden md:block bg-white text-blue-500 px-4 py-2 rounded-full font-medium hover:bg-blue-100 transition-colors duration-200">Mi Cuenta</a>
+                    {% else %}
+                        <!-- Si el usuario NO está logueado, muestra el botón 'Iniciar Sesión' -->
+                        <a href="{{ url_for('login') }}" class="hidden md:block bg-white text-orange-500 px-4 py-2 rounded-full font-medium hover:bg-yellow-50 transition-colors duration-200">Iniciar Sesión</a>
+                    {% endif %}
+                    <button id="mobile-menu-button" class="md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu Panel -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <div class="px-4 pb-4">
+                <a href="{{ url_for('home') }}" class="block py-2 text-white hover:text-yellow-200">Inicio</a>
+                <a href="{{ url_for('ofertas') }}" class="block py-2 text-white hover:text-yellow-200">Ofertas</a>
+                <a href="{{ url_for('home') }}#asociados" class="block py-2 text-white hover:text-yellow-200">Tiendas</a>
+                <div class="border-t border-white/20 my-2"></div>
+                 {% if username and username != 'Invitado' %}
+                    <a href="{{ url_for('mi_cuenta') }}" class="block py-2 text-white hover:text-yellow-200">Mi Cuenta</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="block py-2 text-white hover:text-yellow-200">Iniciar Sesión</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Slider Section -->
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden slider-container">
+            <!-- Slides Wrapper (Content will be dynamically generated by JavaScript) -->            
+            <div id="slides" class="slides-wrapper"> 
+                <!-- Dynamic slides will be inserted here by JavaScript -->
+            </div>
+
+            <!-- Navigation arrows -->
+            <button id="prev" onclick="prevSlide()" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 w-10 h-10 rounded-full flex items-center justify-center shadow-md z-10">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button id="next" onclick="nextSlide()" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 text-gray-800 w-10 h-10 rounded-full flex items-center justify-center shadow-md z-10">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <!-- Dots navigation -->
+            <div id="dot-navigation" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                <!-- Dots will be generated here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2 tottus-blue-text">Ofertas Tottus</h1>
+            <p class="text-gray-600">Aprovecha los mejores precios en todos nuestros productos</p>
+        </div>
+
+        <!-- Filters -->
+        <div class="mb-6">
+          <div class="flex flex-wrap gap-2">
+            <button class="filter-item active px-4 py-2 rounded-full border border-gray-300" data-category="all">Todas las ofertas</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="abarrotes">Abarrotes</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="bebidas">Bebidas</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="lacteos">Lácteos</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="carnes">Carnes</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="frutas-verduras">Frutas y Verduras</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="bebes">Bebés</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="mascotas">Mascotas</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="hogar">Hogar</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="ropa">Ropa</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="tecnologia">Tecnología</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="juguetes">Juguetes</button>
+            <button class="filter-item px-4 py-2 rounded-full border border-gray-300" data-category="farmacia">Farmacia</button>
+            <!-- Botón Limpiar Filtros movido aquí -->
+            <button id="reset-filters-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-full hover:bg-gray-300 transition duration-300">
+                Limpiar Filtros
+            </button>
+          </div>
+        </div>
+
+        <!-- Secondary Filters -->
+        <div class="bg-white rounded-lg shadow-sm p-4 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Marca</label>
+                    <select id="marca-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">Todas las marcas</option>
+                        <!-- Options will be dynamically loaded here -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                    <select id="precio-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">Cualquier precio</option>
+                        <option value="0-1000">Hasta $1.000</option>
+                        <option value="1000-3000">$1.000 - $3.000</option>
+                        <option value="3000-5000">$3.000 - $5.000</option>
+                        <option value="5000+">Más de $5.000</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descuento</label>
+                    <select id="descuento-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">Cualquier descuento</option>
+                        <option value="10">10% o más</option>
+                        <option value="20">20% o más</option>
+                        <option value="30">30% o más</option>
+                        <option value="40">40% o más</option>
+                        <option value="50">50% o más</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+                    <select id="orden-filter" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="recomendados">Recomendados</option>
+                        <option value="menor-precio">Menor precio</option>
+                        <option value="mayor-precio">Mayor precio</option>
+                        <option value="mayor-descuento">Mayor descuento</option>
+                        <option value="nombre-az">Nombre A-Z</option>
+                    </select>
+                </div>
+                <!-- El botón de Limpiar Filtros ha sido movido a la sección de filtros principales -->
+            </div>
+        </div>
+
+        <!-- Loading state -->
+        <div id="loading" class="hidden text-center py-8">
+            <div class="loading mx-auto"></div>
+            <p class="mt-2 text-gray-600">Buscando ofertas...</p>
+        </div>
+
+        <!-- Product List -->
+        <div id="productos-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Products will be dynamically loaded here -->
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-10 flex justify-center">
+            <nav id="page-numbers" class="flex items-center space-x-2">
+                <!-- Pagination buttons will be inserted here -->
+            </nav>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-bear mr-2"></i> Descuentos Bear
+                    </h3>
+                    <p class="text-gray-400">Encuentra las mejores ofertas en supermercados chilenos y ahorra en tus compras diarias.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Enlaces útiles</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Preguntas frecuentes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Cómo funciona</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Términos y condiciones</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Política de privacidad</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contáctanos</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Supermercados</h4>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('jumbo') }}" class="text-gray-400 hover:text-white">Jumbo</a></li>
+                        <li><a href="{{ url_for('lider') }}" class="text-gray-400 hover:text-white">Lider</a></li>
+                        <li><a href="{{ url_for('santaisabel') }}" class="text-gray-400 hover:text-white">Santa Isabel</a></li>
+                        <li><a href="{{ url_for('unimarc') }}" class="text-gray-400 hover:text-white">Unimarc</a></li>
+                        <li><a href="{{ url_for('alvi') }}" class="text-gray-400 hover:text-white">Alvi</a></li>
+                        <li><a href="{{ url_for('tottus') }}" class="text-gray-400 hover:text-white">Tottus</a></li>
+                    </ul>
+                </div>
+                
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 Descuentos Bear. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // The rest of the script remains the same
+            let allProducts = []; 
+            let filteredProducts = [];
+            let currentPage = 1;
+            const productsPerPage = 20;
+
+            const productosContainer = document.getElementById('productos-container');
+            const loadingElement = document.getElementById('loading');
+            const filterItems = document.querySelectorAll('.filter-item');
+            const marcaFilter = document.getElementById('marca-filter');
+            const precioFilter = document.getElementById('precio-filter');
+            const descuentoFilter = document.getElementById('descuento-filter');
+            const ordenFilter = document.getElementById('orden-filter');
+            const pageNumbersContainer = document.getElementById('page-numbers');
+            const resetFiltersBtn = document.getElementById('reset-filters-btn');
+
+            let slides;
+            let totalSlides;
+            let currentSlide = 0;
+            const dotNavigation = document.querySelector('#dot-navigation'); 
+
+            function generateDots() {
+                dotNavigation.innerHTML = ''; 
+                for (let i = 0; i < totalSlides; i++) {
+                    const dot = document.createElement('div');
+                    dot.classList.add('dot', 'rounded-full', 'w-3', 'h-3', 'bg-gray-300', 'cursor-pointer');
+                    dot.setAttribute('onclick', `goToSlide(${i})`);
+                    dotNavigation.appendChild(dot);
+                }
+                updateDots();
+            }
+
+            function updateDots() {
+                document.querySelectorAll('#dot-navigation .dot').forEach((dot, index) => { 
+                    if (index === currentSlide) {
+                        dot.classList.add('active', 'tottus-blue-bg'); 
+                        dot.classList.remove('bg-gray-300');
+                    } else {
+                        dot.classList.remove('active', 'tottus-blue-bg');
+                        dot.classList.add('bg-gray-300');
+                    }
+                });
+            }
+
+            window.goToSlide = function(index) {
+                currentSlide = index;
+                if (currentSlide < 0) {
+                    currentSlide = totalSlides - 1;
+                } else if (currentSlide >= totalSlides) {
+                    currentSlide = 0;
+                }
+                slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+                updateDots();
+            }
+
+            window.nextSlide = function() {
+                goToSlide(currentSlide + 1);
+            }
+
+            window.prevSlide = function() {
+                goToSlide(currentSlide - 1);
+            }
+
+            let slideInterval; 
+
+            function formatPrice(price) {
+                if (typeof price !== 'string') return 'N/A';
+                const numPrice = parseFloat(price.replace(/\./g, '').replace('$', '')); 
+                if (isNaN(numPrice)) return 'N/A';
+                return '$' + numPrice.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function calculateDiscount(original, offer) {
+                const originalNum = parsePrice(original);
+                const offerNum = parsePrice(offer);
+                if (isNaN(originalNum) || isNaN(offerNum) || originalNum === 0) return 0; 
+                return Math.round(((originalNum - offerNum) / originalNum) * 100);
+            }
+
+            function parsePrice(priceString) {
+                if (typeof priceString !== 'string') return NaN;
+                return parseFloat(priceString.replace(/\./g, '').replace('$', ''));
+            }
+
+            function renderProducts(products, page) {
+                loadingElement.classList.remove('hidden');
+                productosContainer.innerHTML = ''; 
+                
+                setTimeout(() => {
+                    const start = (page - 1) * productsPerPage;
+                    const end = start + productsPerPage;
+                    const paginatedProducts = products.slice(start, end);
+                    
+                    if (paginatedProducts.length === 0) {
+                        productosContainer.innerHTML = `
+                            <div class="col-span-full text-center py-12">
+                                <i class="fas fa-search text-4xl text-gray-400 mb-4"></i>
+                                <h3 class="text-xl font-medium text-gray-700">No se encontraron productos</h3>
+                                <p class="text-gray-500 mt-2">Intenta con otros filtros</p>
+                            </div>
+                        `;
+                    } else {
+                        paginatedProducts.forEach(producto => {
+                            const originalPriceVal = parsePrice(producto.precio_original);
+                            const offerPriceVal = parsePrice(producto.precio_oferta);
+                            const discount = calculateDiscount(producto.precio_original, producto.precio_oferta);
+                            
+                            let precioUnitarioText = 'x u'; 
+                            if (producto.descripcion) {
+                                const descLower = producto.descripcion.toLowerCase();
+                                const matchKg = descLower.match(/(\d+\.?\d*)\s*kg/);
+                                const matchL = descLower.match(/(\d+\.?\d*)\s*l/);
+                                const matchG = descLower.match(/(\d+\.?\d*)\s*g/);
+                                const matchMl = descLower.match(/(\d+\.?\d*)\s*ml/);
+
+                                if (matchKg && offerPriceVal) {
+                                    const kg = parseFloat(matchKg[1]);
+                                    if (kg > 0) precioUnitarioText = `${formatPrice(String(offerPriceVal / kg))} x Kg`;
+                                } else if (matchL && offerPriceVal) {
+                                    const l = parseFloat(matchL[1]);
+                                    if (l > 0) precioUnitarioText = `${formatPrice(String(offerPriceVal / l))} x L`;
+                                } else if (matchG && offerPriceVal) {
+                                    const g = parseFloat(matchG[1]);
+                                    if (g > 0 && g >= 100) precioUnitarioText = `${formatPrice(String(offerPriceVal / (g / 100)))} x 100g`;
+                                    else if (g > 0) precioUnitarioText = `${formatPrice(String(offerPriceVal / g))} x g`;
+                                } else if (matchMl && offerPriceVal) {
+                                    const ml = parseFloat(matchMl[1]);
+                                    if (ml > 0 && ml >= 100) precioUnitarioText = `${formatPrice(String(offerPriceVal / (ml / 100)))} x 100ml`;
+                                    else if (ml > 0) precioUnitarioText = `${formatPrice(String(offerPriceVal / ml))} x ml`;
+                                }
+                            }
+                            
+                            const productCard = document.createElement('div');
+                            productCard.className = 'bg-white rounded-lg shadow-sm overflow-hidden product-card transition duration-300';
+                            productCard.innerHTML = `
+                                <div class="relative p-4">
+                                    ${discount > 0 ? `<span class="discount-badge absolute top-4 left-4 px-2 py-1 rounded text-xs font-bold">-${discount}%</span>` : ''}
+                                    <a href="${producto.url_producto || '#'}" target="_blank" rel="noopener noreferrer" class="block">
+                                        <img src="${producto.imagen}" onerror="this.onerror=null;this.src='https://placehold.co/200x200/004B8E/FFFFFF?text=Imagen+No+Disponible';" alt="${producto.nombre}" class="w-full h-48 object-contain mx-auto">
+                                    </a>
+                                </div>
+                                <div class="p-4 border-t">
+                                    <h3 class="font-bold text-lg mb-1 h-14 overflow-hidden">${producto.nombre}</h3>
+                                    <p class="text-gray-500 text-sm mb-2">${producto.descripcion}</p>
+                                    <div class="flex items-center mb-2">
+                                        ${originalPriceVal > offerPriceVal ? `<span class="text-gray-400 price-before text-sm mr-2">${formatPrice(producto.precio_original)}</span>` : ''}
+                                        <span class="tottus-blue-text font-bold text-lg">${formatPrice(producto.precio_oferta)}</span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm mb-3">${precioUnitarioText}</p>
+                                    <button class="w-full tottus-blue-bg text-white py-2 rounded-md hover:bg-blue-700 transition duration-300 add-to-cart" data-id="${producto.nombre}" onclick="window.open('${producto.url_producto || '#'}', '_blank')">
+                                        Ver producto
+                                    </button>
+                                </div>
+                            `;
+                            productosContainer.appendChild(productCard);
+                        });
+                    }
+                    
+                    loadingElement.classList.add('hidden');
+                    updatePaginationButtons(products.length);
+                }, 300);
+            }
+
+            function addPaginationButton(pageNumber) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `px-3 py-1 rounded border text-gray-600 hover:bg-gray-100 page-btn ${pageNumber === currentPage ? 'tottus-blue-bg text-white' : ''}`;
+                pageBtn.dataset.page = pageNumber;
+                pageBtn.textContent = pageNumber;
+                pageBtn.addEventListener('click', () => {
+                    currentPage = pageNumber;
+                    renderProducts(filteredProducts, currentPage);
+                });
+                pageNumbersContainer.appendChild(pageBtn);
+            }
+
+            function addEllipsis() {
+                const ellipsis = document.createElement('span');
+                ellipsis.textContent = '...';
+                ellipsis.classList.add('px-3', 'py-1', 'text-gray-600');
+                pageNumbersContainer.appendChild(ellipsis);
+            }
+
+            function updatePaginationButtons(totalProducts) {
+                const totalPages = Math.ceil(totalProducts / productsPerPage);
+                pageNumbersContainer.innerHTML = ''; 
+
+                if (totalPages <= 1) return;
+
+                const maxVisibleNumericButtons = 8; 
+                let startPage, endPage;
+
+                if (totalPages <= maxVisibleNumericButtons) {
+                    startPage = 1;
+                    endPage = totalPages;
+                } else {
+                    const half = Math.floor(maxVisibleNumericButtons / 2);
+                    startPage = Math.max(1, currentPage - half);
+                    endPage = Math.min(totalPages, currentPage + half - (maxVisibleNumericButtons % 2 === 0 ? 1 : 0));
+
+                    if (endPage - startPage + 1 < maxVisibleNumericButtons) {
+                        if (startPage === 1) {
+                            endPage = Math.min(totalPages, maxVisibleNumericButtons);
+                        } else if (endPage === totalPages) {
+                            startPage = Math.max(1, totalPages - maxVisibleNumericButtons + 1);
+                        }
+                    }
+                }
+
+                if (currentPage > 1) {
+                    const prevArrowBtn = document.createElement('button');
+                    prevArrowBtn.className = `px-3 py-1 rounded border text-gray-600 hover:bg-gray-100`;
+                    prevArrowBtn.innerHTML = `<i class="fas fa-chevron-left"></i>`;
+                    prevArrowBtn.addEventListener('click', () => {
+                        currentPage--;
+                        renderProducts(filteredProducts, currentPage);
+                    });
+                    pageNumbersContainer.appendChild(prevArrowBtn);
+                }
+
+                if (startPage > 1) {
+                    addPaginationButton(1);
+                    if (startPage > 2) addEllipsis();
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
+                    addPaginationButton(i);
+                }
+
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) addEllipsis();
+                    addPaginationButton(totalPages);
+                }
+                
+                if (currentPage < totalPages) {
+                    const nextArrowBtn = document.createElement('button');
+                    nextArrowBtn.className = `px-3 py-1 rounded border text-gray-600 hover:bg-gray-100`;
+                    nextArrowBtn.innerHTML = `<i class="fas fa-chevron-right"></i>`;
+                    nextArrowBtn.addEventListener('click', () => {
+                        currentPage++;
+                        renderProducts(filteredProducts, currentPage);
+                    });
+                    pageNumbersContainer.appendChild(nextArrowBtn);
+                }
+            }
+
+            function applyFiltersAndRender() {
+                let tempProducts = [...allProducts]; 
+
+                const activeCategoryElement = document.querySelector('.filter-item.active');
+                const activeCategory = activeCategoryElement ? activeCategoryElement.dataset.category : 'all';
+                const marca = marcaFilter.value;
+                const precio = precioFilter.value;
+                const descuento = descuentoFilter.value;
+                const orden = ordenFilter.value;
+                
+                if (activeCategory !== 'all') {
+                    tempProducts = tempProducts.filter(p => 
+                        p.categoria.toLowerCase().replace(/\s/g, '').replace(/\//g, '-') === activeCategory.replace(/\s/g, '')
+                    );
+                }
+
+                if (marca !== 'all') {
+                    tempProducts = tempProducts.filter(p => p.marca.toLowerCase() === marca.toLowerCase());
+                }
+
+                if (precio !== 'all') {
+                    tempProducts = tempProducts.filter(p => {
+                        const offerPrice = parsePrice(p.precio_oferta);
+                        if (isNaN(offerPrice)) return false;
+
+                        switch (precio) {
+                            case '0-1000': return offerPrice <= 1000;
+                            case '1000-3000': return offerPrice > 1000 && offerPrice <= 3000;
+                            case '3000-5000': return offerPrice > 3000 && offerPrice <= 5000;
+                            case '5000+': return offerPrice > 5000;
+                            default: return true;
+                        }
+                    });
+                }
+
+                if (descuento !== 'all') {
+                    const minDiscount = parseInt(descuento);
+                    tempProducts = tempProducts.filter(p => {
+                        const discount = calculateDiscount(p.precio_original, p.precio_oferta);
+                        return discount >= minDiscount;
+                    });
+                }
+
+                switch (orden) {
+                    case 'menor-precio':
+                        tempProducts.sort((a, b) => parsePrice(a.precio_oferta) - parsePrice(b.precio_oferta));
+                        break;
+                    case 'mayor-precio':
+                        tempProducts.sort((a, b) => parsePrice(b.precio_oferta) - parsePrice(a.precio_oferta));
+                        break;
+                    case 'mayor-descuento':
+                        tempProducts.sort((a, b) => calculateDiscount(b.precio_original, b.precio_oferta) - calculateDiscount(a.precio_original, a.precio_oferta));
+                        break;
+                    case 'nombre-az':
+                        tempProducts.sort((a, b) => a.nombre.localeCompare(b.nombre));
+                        break;
+                }
+
+                filteredProducts = tempProducts;
+                currentPage = 1;
+                renderProducts(filteredProducts, currentPage);
+            }
+
+            filterItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    filterItems.forEach(btn => btn.classList.remove('active', 'tottus-blue-bg', 'text-white'));
+                    item.classList.add('active', 'tottus-blue-bg', 'text-white');
+                    currentPage = 1;
+                    applyFiltersAndRender();
+                });
+            });
+
+            resetFiltersBtn.addEventListener('click', () => {
+                marcaFilter.value = 'all';
+                precioFilter.value = 'all';
+                descuentoFilter.value = 'all';
+                ordenFilter.value = 'recomendados';
+                currentPage = 1;
+
+                const allOffersButton = document.querySelector('.filter-item[data-category="all"]');
+                if (allOffersButton) {
+                    filterItems.forEach(btn => btn.classList.remove('active', 'tottus-blue-bg', 'text-white'));
+                    allOffersButton.classList.add('active', 'tottus-blue-bg', 'text-white');
+                }
+                applyFiltersAndRender(); 
+            });
+
+
+            marcaFilter.addEventListener('change', () => { currentPage = 1; applyFiltersAndRender(); });
+            precioFilter.addEventListener('change', () => { currentPage = 1; applyFiltersAndRender(); });
+            descuentoFilter.addEventListener('change', () => { currentPage = 1; applyFiltersAndRender(); });
+            ordenFilter.addEventListener('change', () => { currentPage = 1; applyFiltersAndRender(); });
+
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('add-to-cart')) { 
+                    console.log(`Botón 'Ver producto' clicado para: ${e.target.dataset.id}`);
+                }
+            });
+
+            function renderDynamicProductSlides() {
+                const slidesContainer = document.getElementById('slides');
+                if(!slidesContainer) return;
+                slidesContainer.innerHTML = '';
+
+                // Static Tottus banner images
+                const staticBannerPaths = [
+                    'static/img/tottus-slide1.png', // Assuming these paths are now correct and accessible
+                    'static/img/tottus-slide2.png',
+                    'static/img/tottus-slide3.png',
+                    'static/img/tottus-slide4.png',
+                    'static/img/tottus-slide5.png',
+                ];
+
+                staticBannerPaths.forEach(path => {
+                    const slideDiv = document.createElement('div');
+                    slideDiv.className = 'slide flex h-full items-center justify-center';
+                    // Use a more generic placeholder if the static paths fail
+                    slideDiv.innerHTML = `<img src="${path}" alt="Tottus Banner" class="h-full w-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/1920x560/004B8E/FFFFFF?text=Tottus+Ofertas';">`;
+                    slidesContainer.appendChild(slideDiv);
+                });
+                
+                slides = slidesContainer;
+                totalSlides = slides.children.length;
+                generateDots();
+                goToSlide(0);
+                
+                clearInterval(slideInterval);
+                slideInterval = setInterval(nextSlide, 5000);
+            }
+
+            async function loadProducts() {
+                try {
+                    const response = await fetch('static/data/productos_tottus.json'); 
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    // Mapear los nombres de las propiedades del JSON para que coincidan con lo que el código espera
+                    allProducts = data.map(p => ({
+                        nombre: p.nombre || "Producto sin nombre",
+                        descripcion: p.descripcion || "",
+                        // Ensure prices are converted to string for consistency with existing parsePrice
+                        precio_original: p.precio_anterior !== undefined ? String(p.precio_anterior) : 'N/A', 
+                        precio_oferta: p.precio_actual !== undefined ? String(p.precio_actual) : 'N/A', 
+                        descuento: p.descuento || 0,
+                        marca: (p.marca || "sin marca").toLowerCase(),
+                        categoria: p.categoria ? p.categoria.toLowerCase().replace(/\s/g, '-').replace(/\//g, '-') : "otros",
+                        imagen: p.imagen || 'https://placehold.co/200x200/004B8E/FFFFFF?text=Imagen+No+Disponible',
+                        url_producto: p.link || '#',
+                        supermarket: 'Tottus', 
+                        supermarketLogo: 'https://placehold.co/56x56/004B8E/FFFFFF?text=T' 
+                    }));
+                    
+                    const uniqueBrands = [...new Set(allProducts.map(p => p.marca.trim().toLowerCase()))]
+                                                .filter(brand => brand && brand !== 'n/a')
+                                                .sort((a, b) => a.localeCompare(b));
+                                                
+                    marcaFilter.innerHTML = '<option value="all">Todas las marcas</option>';
+                    uniqueBrands.forEach(brand => {
+                        const option = document.createElement('option');
+                        option.value = brand;
+                        option.textContent = brand.charAt(0).toUpperCase() + brand.slice(1);
+                        marcaFilter.appendChild(option);
+                    });
+
+                    // renderDynamicProductSlides(); // Moved to be called outside loadProducts
+                    applyFiltersAndRender();
+                } catch (error) {
+                    console.error("Error al cargar los productos:", error);
+                    loadingElement.classList.add('hidden');
+                    productosContainer.innerHTML = `
+                        <div class="col-span-full text-center py-12 bg-red-50 rounded-lg border border-red-200">
+                            <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                            <h3 class="text-xl font-medium text-red-800">Error al cargar productos</h3>
+                            <p class="text-red-600 mt-2">
+                                No se pudo encontrar el archivo <code>static/data/productos_tottus.json</code>.
+                                <br>
+                                Por favor, asegúrate de que el archivo existe en la ubicación correcta y sea un JSON válido.
+                            </p>
+                        </div>`;
+                }
+            }
+
+            renderDynamicProductSlides(); // Call the slider function independently
+            loadProducts();
+        });
+    </script>
+</body>
+</html>

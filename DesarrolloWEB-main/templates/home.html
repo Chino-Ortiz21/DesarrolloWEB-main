@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descuentos Bear - Las mejores ofertas de supermercados en Chile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Fondo degradado para el header y la sección hero */
+        .gradient-bg {
+            background: linear-gradient(135deg, #370dce 0%, #fda085 100%);
+        }
+        /* Efecto hover para las tarjetas */
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        /* Insignia de descuento en las tarjetas de producto */
+        .discount-badge {
+            position: absolute;
+            top: 8px; /* Ajustado para estar dentro y visible */
+            left: 8px; /* Ajustado para estar en la esquina superior izquierda */
+            background: linear-gradient(135deg, #370dce 0%, #fda085 100%); /* Color de gradiente para el descuento */
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            z-index: 10; /* Asegura que la insignia esté por encima de otros elementos */
+        }
+        /* Estilo para el input de búsqueda al enfocar */
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Define la animación de rotación 3D sobre el eje Y */
+        @keyframes spinY {
+            from {
+                transform: rotateY(0deg);
+            }
+            to {
+                transform: rotateY(360deg);
+            }
+        }
+
+        /* Estilos base para el contenedor del logo (el <a>) */
+        .store-logo {
+            /* Añade perspectiva al padre para un mejor efecto 3D en los hijos */
+            perspective: 1000px;
+            /* Habilita transformaciones 3D en los hijos */
+            transform-style: preserve-3d;
+            /* Asegura que el contenedor es un bloque flexible para centrar imagen y texto */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4px; /* Un poco de padding para separación */
+        }
+        
+        /* Estilos de la imagen dentro del contenedor del logo */
+        .store-logo img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            transform-origin: center; /* Asegura que la rotación sea desde el centro de la imagen */
+            /* Oculta la parte trasera de la imagen durante la rotación para evitar artefactos */
+            backface-visibility: hidden;
+            /* La transición se aplica aquí para que la animación ocurra suavemente */
+            /* Se establece una transición de 0s por defecto para que no haya animación de regreso */
+            transition: transform 0s; /* No transiciona cuando no hay hover, para que "salga" instantáneamente */
+        }
+
+        /* Animación de rotación 3D sobre el eje Y al pasar el mouse sobre la imagen del logo */
+        .store-logo:hover img {
+            /* Aplica la animación 'spinY' durante 0.6 segundos, con aceleración/desaceleración y mantiene el estado final */
+            animation: spinY 0.6s ease-in-out forwards;
+        }
+
+        /* Transición para las tarjetas de oferta */
+        .deal-card {
+            transition: all 0.3s ease;
+        }
+        /* Efecto de sombra al pasar el mouse sobre las tarjetas de oferta */
+        .deal-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Comportamiento de desplazamiento suave */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Estilo para los resultados de búsqueda */
+        .search-results {
+            position: absolute;
+            top: 100%; /* Justo debajo del input */
+            left: 0;
+            right: 0;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 20; /* Para que aparezca sobre otros elementos */
+            list-style: none; /* Eliminar viñetas de lista */
+            padding: 0; /* Eliminar padding por defecto de lista */
+            margin-top: 0.5rem; /* Espacio entre input y resultados */
+        }
+
+        /* Estilo para cada elemento de la lista de resultados de búsqueda */
+        .search-results li {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Eliminar borde inferior del último elemento de la lista */
+        .search-results li:last-child {
+            border-bottom: none;
+        }
+
+        /* Efecto hover para los elementos de la lista de resultados */
+        .search-results li:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* Estilo para la imagen del producto en los resultados de búsqueda */
+        .search-result-image {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-right: 1rem;
+            border-radius: 0.25rem;
+        }
+
+        /* Contenedor de información en los resultados de búsqueda */
+        .search-result-info {
+            flex-grow: 1;
+        }
+
+        /* Nombre del producto en los resultados de búsqueda */
+        .search-result-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Supermercado en los resultados de búsqueda */
+        .search-result-supermarket {
+            font-size: 0.875rem;
+            color: #777;
+        }
+
+        /* Precio en los resultados de búsqueda */
+        .search-result-price {
+            font-weight: bold;
+            color: #d91e18; /* Color de oferta */
+            margin-left: auto;
+        }
+
+        /* Estilos para el logo del supermercado en la tarjeta de oferta */
+        .supermarket-logo-card {
+            position: absolute;
+            top: 8px; /* Pequeño margen desde arriba */
+            right: 8px; /* Pequeño margen desde la derecha */
+            width: 56px; /* Aumentado el tamaño del contenedor del logo */
+            height: 56px; /* Aumentado el tamaño del contenedor del logo */
+            background-color: white; /* Fondo blanco para el logo */
+            border-radius: 9999px; /* Completamente redondo */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+            z-index: 10; /* Asegura que esté sobre la imagen del producto */
+            padding: 4px; /* Añade un pequeño padding para el logo dentro del círculo */
+        }
+        /* Ajuste de imagen dentro del contenedor del logo en la tarjeta */
+        .supermarket-logo-card img {
+            width: 100%; /* Ajusta el tamaño de la imagen para llenar el espacio del padding */
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header Section -->
+    <header class="gradient-bg text-white shadow-md">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-bear text-3xl"></i>
+                    <h1 class="text-2xl font-bold">Descuentos Bear</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6">
+                    <a href="/" class="hover:text-yellow-200 font-medium">Inicio</a>
+                    <a href="/ofertas" class="hover:text-yellow-200 font-medium">Ofertas</a>
+                    <a href="#asociados" class="hover:text-yellow-200 font-medium">Tiendas</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <!-- Contenedor para el estado de la sesión y botones de acción -->
+                    {% if username and username != 'Invitado' %}
+                    <button class="bg-white text-orange-500 px-4 py-2 rounded-full font-medium hover:bg-yellow-50 transition-colors duration-200">
+                        <a href="/mi_cuenta" class="hover:text-orange-600">Mi Cuenta</a>
+                    </button>
+                    {% else %}
+                    <button class="bg-white text-orange-500 px-4 py-2 rounded-full font-medium hover:bg-yellow-50 transition-colors duration-200">
+                        <a href="/login" class="hover:text-orange-600">Iniciar Sesión</a>
+                    </button>
+                    {% endif %}
+                    <button class="md:hidden text-2xl">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <h2 class="text-4xl font-bold mb-4">¡Encuentra las mejores ofertas en supermercados!</h2>
+                    <p class="text-xl mb-6">Ahorra en tus compras con los descuentos y promociones de Jumbo, Líder, Santa Isabel y más.</p>
+                    <div class="relative max-w-md">
+                        <input type="text" id="search-input" placeholder="Busca productos, marcas o tiendas..."
+                               class="w-full px-4 py-3 rounded-full text-gray-800 search-input">
+                        <button id="search-button" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-500 text-white p-2 rounded-full">
+                            <i class="fas fa-search"></i>
+                        </button>
+                        <ul id="search-results-container" class="search-results hidden">
+                            <!-- Los resultados de búsqueda se insertarán aquí -->
+                        </ul>
+                    </div>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <img src="static/img/home-slide2.png" alt="Familia comprando" class="rounded-lg shadow-xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+<!-- Stores Section -->
+<section id='asociados' class="py-12 bg-white">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-10">Supermercados asociados</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+            <a href="/jumbo" class="store-logo flex flex-col items-center p-4">
+                <img src="static/img/jumbo-logo.png" alt="Jumbo">
+                <span class="font-medium">Jumbo</span>
+            </a>
+            <a href="/lider" class="store-logo flex flex-col items-center p-4">
+                <img src="static/img/lider-logo.png" alt="Líder">
+                <span class="font-medium">Líder</span>
+            </a>
+            <a href="/santaisabel" class="store-logo flex flex-col items-center p-4">
+                <img src="static/img/santaisabel-logo.png" alt="Santa Santa">
+                <span class="font-medium">Santa Santa</span>
+            </a>
+            <a href="/unimarc" class="store-logo flex flex-col items-center p-4">
+                <img src="static/img/unimarc-logo.png" alt="Unimarc">
+                <span class="font-medium">Unimarc</span>
+            </a>
+            <a href="/alvi" class="store-logo flex flex-col items-center p-4">
+                <img src="static/img/alvi-logo.png" alt="Alvi">
+                <span class="font-medium">Alvi</span>
+            </a>
+            <a href="/tottus" class="store-logo flex flex-col items-center p-4">
+                <img src="static/img/tottus-logo.png" alt="Tottus">
+                <span class="font-medium">Tottus</span>
+            </a>
+        </div>
+    </div>
+</section>
+
+
+    <!-- Luca Zone (previous Featured Deals) -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-bold">Luca Zone ✨</h2>
+                <a href="/ofertas?priceFilter=0-1000" id="view-all-luca-zone" class="text-orange-500 font-medium hover:underline">Ver todas</a>
+            </div>
+            <div id="luca-zone-products" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Productos a 1000 pesos se cargarán aquí -->
+            </div>
+        </div>
+    </section>
+
+
+ <!-- Categories -->
+    <section class="py-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-10">Explora por categorías</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <a href="/ofertas?category=abarrotes" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-utensils text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Abarrotes</h3>
+                </a>
+                <a href="/ofertas?category=bebidas" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-wine-bottle text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Bebidas</h3>
+                </a>
+                <a href="/ofertas?category=lacteos" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-cheese text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Lácteos</h3>
+                </a>
+                <a href="/ofertas?category=carnes" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-drumstick-bite text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Carnes</h3>
+                </a>
+                <a href="/ofertas?category=frutas-verduras" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-apple-alt text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Frutas/Verduras</h3>
+                </a>
+                <a href="/ofertas?category=bebes" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-baby text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Bebés</h3>
+                </a>
+                <a href="/ofertas?category=mascotas" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-paw text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Mascotas</h3>
+                </a>
+                <a href="/ofertas?category=hogar" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-home text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Hogar</h3>
+                </a>
+                <a href="/ofertas?category=ropa" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-tshirt text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Ropa</h3>
+                </a>
+                <a href="/ofertas?category=tecnologia" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-mobile-alt text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Tecnología</h3>
+                </a>
+                <a href="/ofertas?category=juguetes" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-gamepad text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Juguetes</h3>
+                </a>
+                <a href="/ofertas?category=farmacia" class="bg-white p-6 rounded-lg shadow-sm text-center hover:bg-orange-50 transition">
+                    <i class="fas fa-pills text-3xl text-orange-500 mb-2"></i>
+                    <h3 class="font-medium">Farmacia</h3>
+                </a>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Footer Section -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fas fa-bear mr-2"></i> Descuentos Bear
+                    </h3>
+                    <p class="text-gray-400">Encuentra las mejores ofertas en supermercados chilenos y ahorra en tus compras diarias.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Enlaces útiles</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Preguntas frecuentes</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Cómo funciona</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Términos y condiciones</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Política de privacidad</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contáctanos</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-lg mb-4">Supermercados</h4>
+                    <ul class="space-y-2">
+                        <li><a href="/jumbo" class="text-gray-400 hover:text-white">Jumbo</a></li>
+                        <li><a href="/lider" class="text-gray-400 hover:text-white">Lider</a></li>
+                        <li><a href="/santaisabel" class="text-gray-400 hover:text-white">Santa Isabel</a></li>
+                        <li><a href="/unimarc" class="text-gray-400 hover:text-white">Unimarc</a></li>
+                        <li><a href="/alvi" class="text-gray-400 hover:text-white">Alvi</a></li>
+                        <li><a href="/tottus" class="text-gray-400 hover:text-white">Tottus</a></li>
+                    </ul>
+                </div>
+
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>© 2025 Descuentos Bear. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+       // Rutas de los logos (asegúrate que estas rutas sean correctas en tu proyecto)
+       const SANTA_ISABEL_LOGO = 'static/img/santaisabel-logo.png';
+       const LIDER_LOGO = 'static/img/lider-logo.png';
+       const UNIMARC_LOGO = 'static/img/unimarc-logo.png';
+       const ALVI_LOGO = 'static/img/alvi-logo.png';
+       const JUMBO_LOGO = 'static/img/jumbo-logo.png';
+       const TOTTUS_LOGO = 'static/img/tottus-logo.png';
+       const PLACEHOLDER_IMAGE = 'https://placehold.co/280x280/eee/ccc?text=Imagen+no+disponible';
+
+
+        let allProducts = []; // Almacenará todos los productos combinados de los JSON
+
+        // Mapeo de nombres de supermercados a rutas de logos
+        const supermarketLogos = {
+            "Santa Isabel": SANTA_ISABEL_LOGO,
+            "Lider": LIDER_LOGO,
+            "Unimarc": UNIMARC_LOGO,
+            "Alvi": ALVI_LOGO,
+            "Jumbo": JUMBO_LOGO,
+            "Tottus": TOTTUS_LOGO
+        };
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Inicializar la carga de productos al cargar la página
+            await initializeProducts();
+
+            // --- Funcionalidad del menú móvil ---
+            const mobileMenuButton = document.querySelector('.md\\:hidden');
+            const navLinks = document.querySelector('nav');
+
+            mobileMenuButton.addEventListener('click', function() {
+                navLinks.classList.toggle('hidden');
+                navLinks.classList.toggle('flex');
+                navLinks.classList.toggle('flex-col');
+                navLinks.classList.toggle('absolute');
+                navLinks.classList.toggle('top-16');
+                navLinks.classList.toggle('left-0');
+                navLinks.classList.toggle('right-0');
+                navLinks.classList.toggle('bg-orange-500');
+                navLinks.classList.toggle('p-4');
+                navLinks.classList.toggle('space-y-4');
+                navLinks.classList.toggle('space-x-6');
+                navLinks.classList.toggle('z-50');
+            });
+
+            // --- Funcionalidad de la barra de búsqueda ---
+            const searchInput = document.getElementById('search-input');
+            const searchResultsContainer = document.getElementById('search-results-container');
+            const searchButton = document.getElementById('search-button');
+
+            searchInput.addEventListener('input', function() {
+                const query = searchInput.value.toLowerCase().trim();
+                if (query.length > 2) { // Mostrar resultados después de 2 caracteres
+                    const results = allProducts.filter(product =>
+                        product.nombre.toLowerCase().includes(query) ||
+                        product.marca.toLowerCase().includes(query) ||
+                        product.supermarket.toLowerCase().includes(query)
+                    ).slice(0, 5); // Mostrar solo los primeros 5 resultados
+
+                    renderSearchResults(results);
+                    searchResultsContainer.classList.remove('hidden');
+                } else {
+                    searchResultsContainer.classList.add('hidden');
+                    searchResultsContainer.innerHTML = '';
+                }
+            });
+
+            // Ocultar resultados al hacer clic fuera
+            document.addEventListener('click', function(event) {
+                if (!searchInput.contains(event.target) && !searchResultsContainer.contains(event.target)) {
+                    searchResultsContainer.classList.add('hidden');
+                }
+            });
+
+            // Cuando se hace clic en el botón de búsqueda, redirige a ofertas.html con el término de búsqueda
+            searchButton.addEventListener('click', function() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    // Se cambió la ruta a /ofertas
+                    window.location.href = `/ofertas?search=${encodeURIComponent(query)}`;
+                }
+            });
+
+            // --- Funcionalidad "Luca Zone" ---
+            const lucaZoneProductsContainer = document.getElementById('luca-zone-products');
+            const viewAllLucaZoneButton = document.getElementById('view-all-luca-zone');
+
+            renderLucaZoneProducts();
+
+            viewAllLucaZoneButton.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevenir el comportamiento por defecto del enlace
+                // Redirigir a ofertas.html con el filtro de precio "Hasta $1000"
+                // Se cambió la ruta a /ofertas
+                window.location.href = `/ofertas?priceFilter=0-1000`;
+            });
+
+            // --- Reemplazo de "Agregar a lista" por "Ver oferta" ---
+            // Modificar los botones dentro de las tarjetas existentes (si hay)
+            const dealCardButtons = document.querySelectorAll('.deal-card button');
+            dealCardButtons.forEach(button => {
+                const productUrl = button.closest('.deal-card').querySelector('a.deal-card-link')?.href; // Usar optional chaining
+                if (productUrl) {
+                    button.innerHTML = `<i class="fas fa-eye mr-2"></i>Ver oferta`;
+                    button.classList.remove('hover:bg-orange-600');
+                    button.classList.add('hover:opacity-90');
+                    // Asegurarse de que el listener original de 'alert' no exista antes de agregar el nuevo
+                    const oldListener = button._oldClickListener; // Almacenado si lo agregamos antes
+                    if (oldListener) {
+                        button.removeEventListener('click', oldListener);
+                    }
+                    const newListener = () => { window.open(productUrl, '_blank'); };
+                    button.addEventListener('click', newListener);
+                    button._oldClickListener = newListener; // Almacenar para futura remoción
+                }
+            });
+
+            // --- Funcionalidad "Agregar a lista" original de las cards placeholder ---
+            // (Esta parte podría ser eliminada si las cards placeholder ya no existen o se generan dinámicamente)
+            const addToListButtons = document.querySelectorAll('.deal-card button');
+            addToListButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productName = this.closest('.deal-card').querySelector('h3')?.textContent; // Usar optional chaining
+                    if (productName) {
+                        // Mantener el alert simple por ahora, pero se puede integrar con un sistema de listas
+                        // Reemplazar alert con un mensaje en la consola o un modal personalizado
+                        console.log(`"${productName}" ha sido agregado a tu lista de compras.`);
+                    }
+                });
+            });
+        });
+
+        /**
+         * Inicializa la carga de productos de todos los JSON y los combina.
+         */
+        async function initializeProducts() {
+            let combinedRawProducts = [];
+            const jsonFiles = [
+                { path: 'static/data/productos_santa_isabel_selenium.json', supermarket: "Santa Isabel" },
+                { path: 'static/data/ofertas_lider.json', supermarket: "Lider" },
+                { path: 'static/data/productos_unimarc.json', supermarket: "Unimarc" }
+                // Agrega aquí rutas para Alvi, Jumbo, Tottus si tienes sus JSONs
+            ];
+
+            for (const file of jsonFiles) {
+                const rawData = await fetchJsonData(file.path);
+                if (rawData.length > 0) {
+                    combinedRawProducts = combinedRawProducts.concat(
+                        processProducts(rawData, file.supermarket, supermarketLogos[file.supermarket])
+                    );
+                }
+            }
+            allProducts = combinedRawProducts;
+            console.log("Todos los productos cargados para el home:", allProducts.length);
+        }
+
+        /**
+         * Convierte una cadena de precio (ej. "$2.080") a un número entero.
+         * Retorna 0 si la entrada no es una cadena válida o es 'N/A'.
+         * @param {string} priceStr - La cadena de precio a parsear.
+         * @returns {number} El precio parseado como un entero.
+         */
+        const parsePrice = (priceStr) => {
+            if (typeof priceStr !== 'string' || priceStr.toLowerCase() === 'n/a') return 0;
+            // Elimina cualquier carácter que no sea un dígito y luego parsea a entero
+            return parseInt(priceStr.replace(/[^0-9]/g, ''), 10) || 0;
+        };
+
+        /**
+         * Procesa los datos de productos crudos para calcular descuentos y normalizar campos,
+         * agregando información del supermercado y su logo.
+         * @param {Array<Object>} rawProducts - Array de objetos de productos crudos.
+         * @param {string} supermarketName - Nombre del supermercado.
+         * @param {string} logoPath - Ruta al logo del supermercado.
+         * @returns {Array<Object>} Objetos de productos procesados.
+         */
+        function processProducts(rawProducts, supermarketName, logoPath) {
+            return rawProducts.map((p, index) => {
+                const precioOferta = parsePrice(p.precio_oferta);
+                const precioOriginal = parsePrice(p.precio_original);
+
+                let descuento = 0;
+                // Calcula el descuento solo si hay un precio original y es mayor que el de oferta
+                if (precioOriginal > 0 && precioOferta < precioOriginal) {
+                    descuento = Math.round(((precioOriginal - precioOferta) / precioOriginal) * 100);
+                }
+
+                return {
+                    id: `${supermarketName.replace(/\s/g, '')}-${index + 1}`, // ID único combinando supermercado y índice
+                    nombre: p.nombre || "Producto sin nombre", // Nombre del producto
+                    descripcion: p.descripcion || "", // Descripción
+                    precioOriginal: precioOriginal, // Precio original (numérico)
+                    precioOferta: precioOferta, // Precio de oferta (numérico)
+                    descuento: descuento, // Porcentaje de descuento
+                    marca: (p.marca || "sin marca").toLowerCase(), // Marca en minúsculas
+                    categoria: p.categoria ? p.categoria.toLowerCase().replace(/\s/g, '-') : "otros", // Categoría normalizada
+                    imagen: p.imagen || PLACEHOLDER_IMAGE, // URL de la imagen o placeholder
+                    url: p.url_producto || '#', // URL del producto
+                    supermarket: supermarketName, // Nombre del supermercado
+                    supermarketLogo: logoPath // Ruta al logo del supermercado
+                };
+            });
+        }
+
+        /**
+         * Función para cargar los datos desde un archivo JSON específico.
+         * @param {string} filePath - La ruta al archivo JSON.
+         * @returns {Promise<Array<Object>>} Una promesa que resuelve con un array de objetos, o un array vacío en caso de error.
+         */
+        async function fetchJsonData(filePath) {
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    console.error(`Error HTTP! estado: ${response.status} - Archivo no encontrado: ${filePath}`);
+                    return [];
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                    console.error(`Error al cargar los productos desde ${filePath}:`, error);
+                    return [];
+                }
+            }
+
+        /**
+         * Renderiza los resultados de búsqueda en el contenedor de búsqueda.
+         * @param {Array<Object>} results - Array de productos que coinciden con la búsqueda.
+         */
+        function renderSearchResults(results) {
+            const searchResultsContainer = document.getElementById('search-results-container');
+            searchResultsContainer.innerHTML = ''; // Limpiar resultados anteriores
+
+            if (results.length === 0) {
+                searchResultsContainer.innerHTML = '<li class="text-gray-500 text-center py-4">No se encontraron resultados.</li>';
+                return;
+            }
+
+            results.forEach(product => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <img src="${product.imagen}" alt="${product.nombre}" class="search-result-image">
+                    <div class="search-result-info">
+                        <div class="search-result-name">${product.nombre}</div>
+                        <div class="search-result-supermarket">${product.supermarket}</div>
+                    </div>
+                    <div class="search-result-price">${formatPrice(product.precioOferta)}</div>
+                `;
+                li.addEventListener('click', () => {
+                    // Redirigir a ofertas.html con el filtro de búsqueda aplicado
+                    window.location.href = `/ofertas?search=${encodeURIComponent(product.nombre)}`;
+                });
+                searchResultsContainer.appendChild(li);
+            });
+        }
+
+        /**
+         * Renderiza los productos para la sección "Luca Zone".
+         */
+        function renderLucaZoneProducts() {
+            const lucaZoneProductsContainer = document.getElementById('luca-zone-products');
+            lucaZoneProductsContainer.innerHTML = ''; // Limpiar productos anteriores
+
+            // Filtrar productos a 1000 pesos o menos
+            const lucaProducts = allProducts.filter(product => product.precioOferta <= 1000 && product.precioOferta > 0);
+
+            // Mezclar y tomar un máximo de 12 productos
+            const shuffledLucaProducts = lucaProducts.sort(() => 0.5 - Math.random());
+            const productsToShow = shuffledLucaProducts.slice(0, 12); // Aumentado a 12
+
+            if (productsToShow.length === 0) {
+                lucaZoneProductsContainer.innerHTML = `<div class="col-span-full text-center py-4 text-gray-600">No hay productos en la Luca Zone en este momento.</div>`;
+                return;
+            }
+
+            productsToShow.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'bg-white rounded-lg overflow-hidden shadow-md deal-card relative';
+
+                let precioOriginalHTML = '';
+                if(product.precioOriginal > product.precioOferta) {
+                    precioOriginalHTML = `<span class="text-gray-500 line-through mr-2">${formatPrice(product.precioOriginal)}</span>`;
+                }
+
+                productCard.innerHTML = `
+                    <div class="relative w-full h-48 flex items-center justify-center overflow-hidden">
+                        ${product.descuento > 0 ? `<div class="discount-badge">${product.descuento}%</div>` : ''}
+                        ${product.supermarketLogo ? `<div class="supermarket-logo-card">
+                            <img src="${product.supermarketLogo}" alt="${product.supermarket} logo" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMAGE}';">
+                        </div>` : ''}
+                        <img src="${product.imagen}" alt="${product.nombre}" class="w-full h-full object-contain p-2" onerror="this.onerror=null;this.src='${PLACEHOLDER_IMAGE}';">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-2 truncate">${product.nombre}</h3>
+                        <div class="flex items-center mb-2">
+                            ${precioOriginalHTML}
+                            <span class="text-orange-500 font-bold text-xl">${formatPrice(product.precioOferta)}</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Supermercado: ${product.supermarket}</p>
+                        <a href="${product.url}" target="_blank" rel="noopener noreferrer"
+                           class="w-full bg-orange-500 text-white py-2 rounded-full block text-center hover:bg-orange-600 transition">
+                           <i class="fas fa-eye mr-2"></i>Ver oferta
+                        </a>
+                    </div>
+                `;
+                lucaZoneProductsContainer.appendChild(productCard);
+            });
+        }
+
+        /**
+         * Formatea un número como una cadena de moneda de Peso Chileno.
+         * @param {number} price - El precio a formatear.
+         * @returns {string} La cadena de precio formateada.
+         */
+        function formatPrice(price) {
+            return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(price);
+        }
+    </script>
+</body>
+</html>

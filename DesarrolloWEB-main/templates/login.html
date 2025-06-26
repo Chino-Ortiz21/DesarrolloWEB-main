@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Enhanced Animated Login Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes rotating {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { background: linear-gradient(45deg, #ff0055, #0066ff, #00ff55, #ffcc00); }
+            25% { background: linear-gradient(45deg, #0066ff, #00ff55, #ffcc00, #ff0055); }
+            50% { background: linear-gradient(45deg, #00ff55, #ffcc00, #ff0055, #0066ff); }
+            75% { background: linear-gradient(45deg, #ffcc00, #ff0055, #0066ff, #00ff55); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), 0 0 40px rgba(147, 51, 234, 0.6); }
+        }
+
+        .box::before {
+            content: ""; position: absolute; width: 100%; height: 100%;
+            background: linear-gradient(45deg, #ff0055, #0066ff, #00ff55, #ffcc00);
+            background-size: 400% 400%;
+            animation: rotating 4s linear infinite, pulse-border 8s ease-in-out infinite;
+            filter: drop-shadow(0 15px 50px rgba(0,0,0,0.8));
+            border-radius: 20px; z-index: 0;
+        }
+
+        .box::after {
+            content: ""; position: absolute; inset: 4px;
+            background: linear-gradient(135deg, #2d2d39 0%, #1f1f2e 100%);
+            border-radius: 15px; border: 8px solid #25252b; z-index: 1;
+        }
+
+        .shake { animation: shake 0.6s ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+
+        .bounce-in { animation: bounceIn 0.8s ease-out; }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+            50% { transform: scale(1.05) rotate(2deg); opacity: 0.8; }
+            70% { transform: scale(0.95) rotate(-1deg); opacity: 0.9; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .shift-left   { transform: translateX(-90px) rotate(-10deg); transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .shift-top    { transform: translateY(-60px) rotate(10deg) scale(0.95); transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .shift-right  { transform: translateX(90px) rotate(10deg); transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        .shift-bottom { transform: translateY(60px) rotate(-10deg) scale(1.05); transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+
+        .input-focus { animation: glow 2s ease-in-out infinite; }
+        .success-animation { animation: float 2s ease-in-out infinite; }
+
+        .typing::after { content: '|'; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+
+        .strength-bar { height: 4px; border-radius: 2px; transition: all 0.3s ease; }
+        .password-rules { font-size: 0.75rem; line-height: 1rem; margin-top: 0.5rem; color: #a0aec0; } /* text-xs text-gray-400 */
+        .password-rules li.valid { color: #48bb78; } /* text-green-500 */
+        .password-rules li.invalid { color: #f56565; } /* text-red-500 */
+
+        .particles { position: absolute; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
+        .particle { position: absolute; width: 4px; height: 4px; background: linear-gradient(45deg, #ff0055, #0066ff); border-radius: 50%; animation: float-particle 6s linear infinite; }
+        @keyframes float-particle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; } 90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        
+        .btn-enabled { transform: translateX(0) translateY(0) rotate(0deg) scale(1) !important; transition: all 0.3s ease !important; }
+        .hidden-form { display: none !important; } /* Para ocultar formularios */
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div class="particles">
+        <div class="particle" style="left: 10%; animation-delay: 0s;"></div> <div class="particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="particle" style="left: 30%; animation-delay: 2s;"></div> <div class="particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="particle" style="left: 50%; animation-delay: 4s;"></div> <div class="particle" style="left: 60%; animation-delay: 5s;"></div>
+        <div class="particle" style="left: 70%; animation-delay: 0.5s;"></div> <div class="particle" style="left: 80%; animation-delay: 1.5s;"></div>
+        <div class="particle" style="left: 90%; animation-delay: 2.5s;"></div>
+    </div>
+
+    <div class="box relative w-full max-w-md min-h-[30rem] overflow-hidden rounded-[20px] bounce-in">
+        <div class="relative z-10 h-full flex flex-col items-center justify-center p-6">
+            <div id="login-form-container" class="w-full">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl font-bold text-white mb-2">Bienvenido</h1>
+                    <p class="text-gray-300 text-sm">Inicia Sesión con tu cuenta</p>
+                </div>
+
+                <form class="w-full space-y-4" id="login-form">
+                    <div class="relative group">
+                        <label for="login-username" class="sr-only">Nombre de usuario o Email</label>
+                        <i class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-200"></i>
+                        <input id="login-username" type="text" placeholder="Nombre de usuario o Email"
+                               class="w-full bg-gray-800/80 backdrop-blur-sm text-white rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 border border-gray-700 focus:border-blue-500">
+                        <div class="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 w-0 group-focus-within:w-full transition-all duration-300"></div>
+                    </div>
+
+                    <div class="relative group">
+                        <label for="login-pass" class="sr-only">Contraseña</label>
+                        <i class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-blue-400 transition-colors duration-200"></i>
+                        <input id="login-pass" type="password" placeholder="Contraseña"
+                               class="w-full bg-gray-800/80 backdrop-blur-sm text-white rounded-lg py-3 pl-10 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 border border-gray-700 focus:border-blue-500">
+                        <button type="button" id="login-toggle-password" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 w-0 group-focus-within:w-full transition-all duration-300"></div>
+                    </div>
+
+                    <div class="relative h-28 w-full flex items-center justify-center" style="margin: 1rem 0;">
+                        <button id="login-btn" type="submit" disabled
+                                class="absolute bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white text-sm font-semibold rounded-lg px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl z-10">
+                            <span id="login-btn-text">Iniciar Sesión</span>
+                        </button>
+                    </div>
+
+                    <div id="login-msg" class="text-center text-red-400 font-medium h-6 flex items-center justify-center transition-all duration-300 text-sm"></div>
+
+                    <div class="flex flex-col items-center justify-center gap-2 mt-1 sm:flex-row sm:justify-between">
+                        <label class="flex items-center text-sm text-gray-300">
+                            <input type="checkbox" id="remember-me" class="mr-2 rounded bg-gray-700 border-gray-600 focus:ring-blue-500">
+                            Recuérdame
+                        </label>
+                        <a href="#" id="show-register-form-link" class="text-sm text-gray-400 hover:text-blue-400 transition-colors duration-200 hover:underline">Crear cuenta</a>
+                    </div>
+                    <div class="text-center mt-2">
+                        <button type="button" id="back-to-home-btn" class="text-sm text-gray-400 hover:text-blue-400 transition-colors duration-200 hover:underline">
+                            Volver al Inicio
+                        </button>
+                    </div>
+                </form>
+
+                
+            </div>
+
+            <div id="register-form-container" class="w-full hidden-form">
+                <div class="text-center mb-6">
+                    <h1 class="text-3xl font-bold text-white mb-2">Crear Cuenta</h1>
+                    <p class="text-gray-300 text-sm">Completa tus datos para registrarte</p>
+                </div>
+                <form class="w-full space-y-3" id="register-form">
+                    <div class="relative group">
+                        <label for="register-username" class="sr-only">Nombre de Usuario</label>
+                        <i class="fas fa-user-astronaut absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-teal-400 transition-colors duration-200"></i>
+                        <input id="register-username" type="text" placeholder="Nombre de Usuario"
+                               class="w-full bg-gray-800/80 backdrop-blur-sm text-white rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300 border border-gray-700 focus:border-teal-500">
+                        <div class="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-teal-500 to-cyan-500 w-0 group-focus-within:w-full transition-all duration-300"></div>
+                    </div>
+                    <div class="relative group">
+                        <label for="register-email" class="sr-only">Email</label>
+                        <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-teal-400 transition-colors duration-200"></i>
+                        <input id="register-email" type="email" placeholder="Email"
+                               class="w-full bg-gray-800/80 backdrop-blur-sm text-white rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300 border border-gray-700 focus:border-teal-500">
+                        <div class="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-teal-500 to-cyan-500 w-0 group-focus-within:w-full transition-all duration-300"></div>
+                    </div>
+                    <!-- NUEVO CAMPO: Celular -->
+                    <div class="relative group">
+                        <label for="register-celular" class="sr-only">Celular</label>
+                        <i class="fas fa-mobile-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-teal-400 transition-colors duration-200"></i>
+                        <input id="register-celular" type="tel" placeholder="+56 912345678" maxlength="13"
+                               class="w-full bg-gray-800/80 backdrop-blur-sm text-white rounded-lg py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300 border border-gray-700 focus:border-teal-500">
+                        <div class="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-teal-500 to-cyan-500 w-0 group-focus-within:w-full transition-all duration-300"></div>
+                    </div>
+                    <div class="relative group">
+                        <label for="register-pass" class="sr-only">Contraseña</label>
+                        <i class="fas fa-key absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-teal-400 transition-colors duration-200"></i>
+                        <input id="register-pass" type="password" placeholder="Contraseña"
+                               class="w-full bg-gray-800/80 backdrop-blur-sm text-white rounded-lg py-3 pl-10 pr-12 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300 border border-gray-700 focus:border-teal-500"
+                               aria-describedby="password-rules-list">
+                        <button type="button" id="register-toggle-password" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-teal-500 to-cyan-500 w-0 group-focus-within:w-full transition-all duration-300"></div>
+                    </div>
+                    <div id="password-rules-list" class="password-rules">
+                        <ul class="list-disc list-inside pl-1">
+                            <li id="length-rule">Mínimo 6 caracteres (idealmente 8-12)</li>
+                            <li id="number-rule">Al menos un número (0-9)</li>
+                            <li id="letter-rule">Al menos una letra</li>
+                            <li id="special-rule">Al menos un carácter especial (!@#$%)</li>
+                        </ul>
+                    </div>
+                    <div class="relative group">
+                        <label for="register-confirm-pass" class="sr-only">Confirmar Contraseña</label>
+                        <i class="fas fa-check-circle absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-teal-400 transition-colors duration-200"></i>
+                        <input id="register-confirm-pass" type="password" placeholder="Confirmar Contraseña"
+                               class="w-full bg-gray-800/80 backdrop-blur-sm text-white rounded-lg py-3 pl-10 pr-12 focus:outline-none focus:ring-2 focus:ring-teal-500 transition-all duration-300 border border-gray-700 focus:border-teal-500">
+                        <button type="button" id="register-toggle-confirm-password" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors duration-200">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <div class="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-teal-500 to-cyan-500 w-0 group-focus-within:w-full transition-all duration-300"></div>
+                    </div>
+
+                    <div class="relative h-28 w-full flex items-center justify-center" style="margin: 1rem 0;">
+                         <button id="register-btn" type="submit" disabled
+                            class="absolute bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 text-white text-sm font-semibold rounded-lg px-6 py-3 transition-all duration-300 shadow-lg hover:shadow-xl mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span id="register-btn-text">Crear Cuenta</span>
+                        </button>
+                    </div>
+                   
+                    <div id="register-msg" class="text-center text-red-400 font-medium h-6 flex items-center justify-center transition-all duration-300 text-sm mt-2"></div>
+                    <div class="text-center mt-3">
+                        <a href="#" id="show-login-form-link" class="text-sm text-gray-400 hover:text-teal-400 transition-colors duration-200 hover:underline">¿Ya tienes cuenta? Inicia Sesión</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // === DOM ELEMENT SELECTORS ===
+    const loginFormContainer = document.getElementById('login-form-container');
+    const registerFormContainer = document.getElementById('register-form-container');
+
+    // Login Form Elements
+    const loginForm = document.getElementById('login-form');
+    const loginUsernameInput = document.getElementById('login-username');
+    const loginPassInput = document.getElementById('login-pass');
+    const loginBtn = document.getElementById('login-btn');
+    const loginBtnText = document.getElementById('login-btn-text');
+    const loginMsg = document.getElementById('login-msg');
+    const loginTogglePasswordBtn = document.getElementById('login-toggle-password');
+    const backToHomeBtn = document.getElementById('back-to-home-btn'); // New: back to home button
+
+    // Registration Form Elements
+    const registerForm = document.getElementById('register-form');
+    const registerUsernameInput = document.getElementById('register-username');
+    const registerEmailInput = document.getElementById('register-email');
+    const registerCelularInput = document.getElementById('register-celular');
+    const registerPassInput = document.getElementById('register-pass');
+    const registerConfirmPassInput = document.getElementById('register-confirm-pass');
+    const registerBtn = document.getElementById('register-btn');
+    const registerBtnText = document.getElementById('register-btn-text');
+    const registerMsg = document.getElementById('register-msg');
+    const registerTogglePasswordBtn = document.getElementById('register-toggle-password');
+    const registerToggleConfirmPasswordBtn = document.getElementById('register-toggle-confirm-password');
+    // Password strength rules
+    const lengthRule = document.getElementById('length-rule');
+    const numberRule = document.getElementById('number-rule');
+    const letterRule = document.getElementById('letter-rule');
+    const specialRule = document.getElementById('special-rule');
+
+    // Links to toggle forms
+    const showRegisterFormLink = document.getElementById('show-register-form-link');
+    const showLoginFormLink = document.getElementById('show-login-form-link');
+
+    // Login Button Animation Logic (from your original script)
+    const loginPositions = ['shift-left', 'shift-top', 'shift-right', 'shift-bottom'];
+    let currentLoginPositionIndex = 0;
+    let loginAttemptCount = 0;
+    const loginEncouragingMessages = [
+        "🔐 Recuerda ingresar tus credenciales!", "🤔 No olvides tu contraseña", "🚀 Listo para iniciar",
+        "💡 Consejo: tu contraseña no puede ser ‘1234’", "💪 Un intento mas", "🎮 agárrame si puedes",
+        "📅 Hoy no, dijo el login.", "😴 El servidor se durmió esperando tu contraseña.",
+        "🍕 Una pizza y lo volvés a intentar, ¿dale?",
+    ];
+
+    // Register Button Animation Logic
+    const registerPositions = ['shift-left', 'shift-top', 'shift-right', 'shift-bottom'];
+    let currentRegisterPositionIndex = 0;
+    let registerAttemptCount = 0;
+    const registerEncouragingMessages = [
+        "✍️ Completa todos los campos para registrarte!", "🔒 Asegura tu contraseña", "✅ ¡Casi listo!",
+        "💡 Consejo: una contraseña segura es clave", "👍 Un paso más", "🚀 A registrarse!",
+        "🤔 ¿Listo para unirte?", "🎉 Te estamos esperando!",
+    ];
+
+
+    // === HELPER FUNCTIONS ===
+    function togglePasswordVisibility(inputElement, toggleButtonElement) {
+        const type = inputElement.getAttribute('type') === 'password' ? 'text' : 'password';
+        inputElement.setAttribute('type', type);
+        const icon = toggleButtonElement.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    }
+
+    function displayMessage(element, message, isError = true) {
+        element.textContent = message;
+        if (isError) {
+            element.classList.remove('text-green-400');
+            element.classList.add('text-red-400');
+        } else {
+            element.classList.remove('text-red-400');
+            element.classList.add('text-green-400');
+        }
+    }
+
+    function clearMessage(element) {
+        element.textContent = '';
+    }
+
+    function typeEffect(element, text, callback) {
+        element.classList.add('typing');
+        let index = 0;
+        const interval = setInterval(() => {
+            if (index < text.length) {
+                element.textContent = text.slice(0, index + 1);
+                index++;
+            } else {
+                element.classList.remove('typing');
+                clearInterval(interval);
+                if (callback) callback();
+            }
+        }, 80); // Adjusted speed slightly
+    }
+
+    // === FORM TOGGLING LOGIC ===
+    function showForm(formToShow) {
+        loginFormContainer.classList.add('hidden-form');
+        registerFormContainer.classList.add('hidden-form');
+        formToShow.classList.remove('hidden-form');
+    }
+
+    showRegisterFormLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showForm(registerFormContainer);
+        clearMessage(loginMsg); // Clear any previous login messages
+    });
+
+    showLoginFormLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        showForm(loginFormContainer);
+        clearMessage(registerMsg); // Clear any previous register messages
+    });
+
+    backToHomeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = '/'; // Redirects to the home page
+    });
+
+
+    // === LOGIN FORM LOGIC ===
+    function validateLoginInputs() {
+        const username = loginUsernameInput.value.trim();
+        const password = loginPassInput.value.trim();
+        const isValid = username !== '' && password !== '';
+        loginBtn.disabled = !isValid;
+
+        if (isValid) {
+            loginBtn.classList.add('btn-enabled');
+            loginPositions.forEach(pos => loginBtn.classList.remove(pos));
+            loginBtn.classList.add('success-animation'); // Or your preferred ready animation
+            displayMessage(loginMsg, "✅ Listo para iniciar", false);
+        } else {
+            loginBtn.classList.remove('btn-enabled', 'success-animation');
+            if(username === '' && password === '') {
+                clearMessage(loginMsg);
+            } else {
+                displayMessage(loginMsg, "Por favor, completa ambos campos.");
+            }
+        }
+        return isValid;
+    }
+
+    function shiftLoginButton() {
+        if (!loginBtn.disabled) return;
+        loginAttemptCount++;
+        loginPositions.forEach(pos => loginBtn.classList.remove(pos));
+        loginBtn.classList.add(loginPositions[currentLoginPositionIndex]);
+        currentLoginPositionIndex = (currentLoginPositionIndex + 1) % loginPositions.length;
+
+        const messageIndex = Math.min(loginAttemptCount - 1, loginEncouragingMessages.length - 1);
+        displayMessage(loginMsg, loginEncouragingMessages[messageIndex]);
+        loginMsg.classList.add('shake');
+        setTimeout(() => loginMsg.classList.remove('shake'), 600);
+
+        if (navigator.vibrate) navigator.vibrate(100);
+    }
+
+    [loginUsernameInput, loginPassInput].forEach(input => {
+        input.addEventListener('input', validateLoginInputs);
+        input.addEventListener('focus', () => input.parentElement.classList.add('input-focus'));
+        input.addEventListener('blur', () => input.parentElement.classList.remove('input-focus'));
+    });
+
+    loginTogglePasswordBtn.addEventListener('click', () => togglePasswordVisibility(loginPassInput, loginTogglePasswordBtn));
+
+    loginBtn.addEventListener('mouseenter', () => {
+        if (loginBtn.disabled && !loginBtn.classList.contains('btn-enabled')) {
+            shiftLoginButton();
+        }
+    });
+    loginBtn.addEventListener('mouseleave', () => {
+        if (loginBtn.disabled && loginAttemptCount >= 5) {
+            setTimeout(() => {
+            if (loginBtn.disabled && !loginBtn.classList.contains('btn-enabled')) {
+                loginPositions.forEach(pos => loginBtn.classList.remove(pos));
+                displayMessage(loginMsg, "Chill, me quedaré quieto.");
+            }
+            }, 3000);
+        }
+    });
+
+
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (validateLoginInputs()) {
+            loginBtnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Iniciando...';
+            loginBtn.disabled = true;
+
+            const identifier = loginUsernameInput.value.trim();
+            const password = loginPassInput.value.trim();
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ identifier, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) { // Check if the response status is 2xx
+                    typeEffect(loginMsg, data.message, () => {
+                        displayMessage(loginMsg, data.message, false); // Green for success
+                        document.querySelector('.box').classList.add('success-animation');
+                        // Redirect to a protected page, e.g., home or a dashboard
+                        window.location.href = '/'; // Or any other protected route
+                    });
+                } else {
+                    displayMessage(loginMsg, data.message || "Error al iniciar sesión."); // Red for error
+                    loginBtnText.textContent = 'Iniciar Sesión';
+                    validateLoginInputs(); // Re-enable button
+                    loginForm.classList.add('shake');
+                    setTimeout(() => loginForm.classList.remove('shake'), 600);
+                }
+            }
+            catch (error) {
+                console.error('Error during login:', error);
+                displayMessage(loginMsg, "Error de conexión. Inténtalo de nuevo más tarde.");
+                loginBtnText.textContent = 'Iniciar Sesión';
+                validateLoginInputs(); // Re-enable button
+                loginForm.classList.add('shake');
+                setTimeout(() => loginForm.classList.remove('shake'), 600);
+            }
+        } else {
+            displayMessage(loginMsg, "Por favor, completa todos los campos.");
+            loginForm.classList.add('shake');
+            setTimeout(() => loginForm.classList.remove('shake'), 600);
+        }
+    });
+
+
+    // === REGISTRATION FORM LOGIC ===
+    function validatePasswordRules(password) {
+        const validations = {
+            length: password.length >= 6 && password.length <= 12, // Adjusted max length to 12 as requested
+            number: /[0-9]/.test(password),
+            letter: /[a-zA-Z]/.test(password), // Simple letter check, can be split into upper/lower if needed
+            special: /[^A-Za-z0-9]/.test(password) // Checks for any non-alphanumeric character
+        };
+
+        lengthRule.className = validations.length ? 'valid' : 'invalid';
+        numberRule.className = validations.number ? 'valid' : 'invalid';
+        letterRule.className = validations.letter ? 'valid' : 'invalid';
+        specialRule.className = validations.special ? 'valid' : 'invalid';
+
+        // Update text for clarity
+        lengthRule.textContent = `Mínimo 6, máximo 12 caracteres (${password.length}) ${validations.length ? '✅' : '❌'}`;
+        numberRule.textContent = `Al menos un número (0-9) ${validations.number ? '✅' : '❌'}`;
+        letterRule.textContent = `Al menos una letra ${validations.letter ? '✅' : '❌'}`;
+        specialRule.textContent = `Al menos un carácter especial (!@#$%) ${validations.special ? '✅' : '❌'}`;
+
+        return Object.values(validations).every(Boolean); // All rules must be true
+    }
+
+    function validateRegistrationForm() {
+        clearMessage(registerMsg);
+        let isValid = true;
+
+        const username = registerUsernameInput.value.trim();
+        const email = registerEmailInput.value.trim();
+        const celular = registerCelularInput.value.trim(); // NUEVO: Obtener valor de celular
+        const password = registerPassInput.value;
+        const confirmPassword = registerConfirmPassInput.value;
+
+        if (username === '') {
+            displayMessage(registerMsg, "El nombre de usuario es requerido.");
+            isValid = false;
+        } else if (email === '') {
+            displayMessage(registerMsg, "El email es requerido.");
+            isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            displayMessage(registerMsg, "Por favor, ingresa un email válido.");
+            isValid = false;
+        } else if (!/^\+56\s?9\d{8}$/.test(celular)) {
+            // Validacion de 9 digitos, con prefijo +56 y el 9 obligatorio
+            displayMessage(registerMsg, "Por favor, ingresa un número de celular válido. Formato: +56 912345678.");
+            isValid = false;
+        } else if (!validatePasswordRules(password)) {
+            displayMessage(registerMsg, "La contraseña no cumple con los requisitos.");
+            isValid = false;
+        } else if (password !== confirmPassword) {
+            displayMessage(registerMsg, "Las contraseñas no coinciden.");
+            isValid = false;
+        }
+
+        registerBtn.disabled = !isValid;
+        if (isValid) {
+            registerBtn.classList.add('btn-enabled');
+            registerPositions.forEach(pos => registerBtn.classList.remove(pos));
+            registerBtn.classList.add('success-animation');
+            displayMessage(registerMsg, "✅ Listo para registrar", false);
+        } else {
+            registerBtn.classList.remove('btn-enabled', 'success-animation');
+        }
+        return isValid;
+    }
+
+    function shiftRegisterButton() {
+        if (!registerBtn.disabled) return;
+        registerAttemptCount++;
+        registerPositions.forEach(pos => registerBtn.classList.remove(pos));
+        registerBtn.classList.add(registerPositions[currentRegisterPositionIndex]);
+        currentRegisterPositionIndex = (currentRegisterPositionIndex + 1) % registerPositions.length;
+
+        const messageIndex = Math.min(registerAttemptCount - 1, registerEncouragingMessages.length - 1);
+        displayMessage(registerMsg, registerEncouragingMessages[messageIndex]);
+        registerMsg.classList.add('shake');
+        setTimeout(() => registerMsg.classList.remove('shake'), 600);
+
+        if (navigator.vibrate) navigator.vibrate(100);
+    }
+
+    [registerUsernameInput, registerEmailInput, registerCelularInput, registerPassInput, registerConfirmPassInput].forEach(input => {
+        input.addEventListener('input', validateRegistrationForm);
+        input.addEventListener('focus', () => input.parentElement.classList.add('input-focus'));
+        input.addEventListener('blur', () => input.parentElement.classList.remove('input-focus'));
+    });
+
+    // Event listener for mobile number input to ensure prefix is present on focus
+    registerCelularInput.addEventListener('focus', () => {
+        if (!registerCelularInput.value.startsWith('+56 9')) {
+            registerCelularInput.value = '+56 9';
+        }
+        // Place cursor after the prefix
+        if (registerCelularInput.value === '+56 9') {
+            registerCelularInput.setSelectionRange(registerCelularInput.value.length, registerCelularInput.value.length);
+        }
+    });
+
+    // Event listener for mobile number input to correct prefix on blur if invalid
+    registerCelularInput.addEventListener('blur', () => {
+        // Only reset if it's not a valid full number already
+        if (!/^\+56\s?9\d{8}$/.test(registerCelularInput.value)) {
+            if (registerCelularInput.value.trim() === '' || !registerCelularInput.value.startsWith('+56 9')) {
+                registerCelularInput.value = '+56 9';
+            }
+        }
+        validateRegistrationForm(); // Re-validate after correction/leaving field
+    });
+
+    registerPassInput.addEventListener('input', () => {
+        validatePasswordRules(registerPassInput.value);
+        validateRegistrationForm(); // Validate the entire form on password change
+    });
+
+    registerConfirmPassInput.addEventListener('input', validateRegistrationForm);
+
+    registerTogglePasswordBtn.addEventListener('click', () => togglePasswordVisibility(registerPassInput, registerTogglePasswordBtn));
+    registerToggleConfirmPasswordBtn.addEventListener('click', () => togglePasswordVisibility(registerConfirmPassInput, registerToggleConfirmPasswordBtn));
+
+    registerBtn.addEventListener('mouseenter', () => {
+        if (registerBtn.disabled && !registerBtn.classList.contains('btn-enabled')) {
+            shiftRegisterButton();
+        }
+    });
+    registerBtn.addEventListener('mouseleave', () => {
+        if (registerBtn.disabled && registerAttemptCount >= 5) {
+            setTimeout(() => {
+            if (registerBtn.disabled && !registerBtn.classList.contains('btn-enabled')) {
+                registerPositions.forEach(pos => registerBtn.classList.remove(pos));
+                displayMessage(registerMsg, "Chill, me quedaré quieto.");
+            }
+            }, 3000);
+        }
+    });
+
+
+    registerForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (validateRegistrationForm()) {
+            registerBtnText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Registrando...';
+            registerBtn.disabled = true;
+
+            const username = registerUsernameInput.value.trim();
+            const email = registerEmailInput.value.trim();
+            const celular = registerCelularInput.value.trim(); // NUEVO: Obtener celular para el payload
+            const password = registerPassInput.value; // Send raw password for hashing on backend
+            const confirm_password = registerConfirmPassInput.value;
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email, celular, password, confirm_password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    typeEffect(registerMsg, data.message, () => {
+                        displayMessage(registerMsg, data.message, false);
+                        registerForm.reset();
+                        setTimeout(() => showForm(loginFormContainer), 2000);
+                    });
+                } else {
+                    displayMessage(registerMsg, data.message || "Error en el registro.");
+                    registerForm.classList.add('shake');
+                    setTimeout(() => registerForm.classList.remove('shake'), 600);
+                }
+            } catch (error) {
+                console.error('Error during registration:', error);
+                displayMessage(registerMsg, "Error de conexión. Inténtalo de nuevo más tarde.");
+                registerForm.classList.add('shake');
+                setTimeout(() => registerForm.classList.remove('shake'), 600);
+            } finally {
+                registerBtnText.textContent = 'Crear Cuenta';
+                validateRegistrationForm();
+            }
+        } else {
+            registerForm.classList.add('shake');
+            setTimeout(() => registerForm.classList.remove('shake'), 600);
+        }
+    });
+
+
+    // Initial validation check for login form on load
+    document.addEventListener('DOMContentLoaded', () => {
+        validateLoginInputs();
+        validateRegistrationForm(); // Also validate registration form on load
+
+        // Ensure the mobile input starts with +56 9 if empty on load
+        if (registerCelularInput.value.trim() === '') {
+            registerCelularInput.value = '+56 9';
+        }
+    });
+
+</script>
+</body>
+</html>
