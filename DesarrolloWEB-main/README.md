@@ -20,6 +20,27 @@ Este proyecto es una aplicación web desarrollada con Flask y SQLAlchemy que per
 3. **Configura la base de datos:**
    - Edita el archivo `db_config.py` con los datos de tu servidor SQL Server.
    - Asegúrate de tener el driver ODBC adecuado instalado en tu sistema.
+   - Dentro de SQL Server, asegurate de tener la tabla de usuarios, de lo contrario creala
+     con el siguiente script: 
+
+   -- Create the database
+   CREATE DATABASE intetoweb;
+   GO
+
+   -- Use the newly created database
+   USE intetoweb;
+   GO
+
+   -- Create the dbo.usuarios table
+   CREATE TABLE dbo.usuarios (
+      id_usuario INT PRIMARY KEY NOT NULL,
+      nombre VARCHAR(100) NOT NULL,
+      email VARCHAR(100) NOT NULL UNIQUE,
+      celular VARCHAR(20) NOT NULL,
+      contrasena VARCHAR(255) NOT NULL,
+      fecha_registro DATETIME DEFAULT GETDATE()
+   );
+   GO
 
 4. **Configura la clave secreta (opcional pero recomendado):**
    - Puedes definir la variable de entorno `FLASK_SECRET_KEY` para mayor seguridad.
@@ -28,7 +49,15 @@ Este proyecto es una aplicación web desarrollada con Flask y SQLAlchemy que per
      $env:FLASK_SECRET_KEY="una_clave_secreta_segura"
      ```
 
-5. **Ejecuta la aplicación:**
+5. **Actualiza los Scraping:**
+   - Ejecuta los archivos "Scraping(supermrcado).py
+   - Siga las instrucciones dentro de la terminal
+   - Una vez finalizado los scraping, se crearan archivos (supermercado)ofertas.json
+     Este archibo debe ser copiado y pegado dentro de static\data, se le debe modificar
+     el nombre por: productos_(supermercado).json
+
+
+6. **Ejecuta la aplicación:**
    ```bash
    flask run
    ```
@@ -37,8 +66,9 @@ Este proyecto es una aplicación web desarrollada con Flask y SQLAlchemy que per
    python app.py
    ```
 
-6. **Accede a la aplicación:**
+7. **Accede a la aplicación:**
    - Abre tu navegador y ve a [http://localhost:5000](http://localhost:5000)
+
 
 ## Estructura del Proyecto
 
@@ -80,4 +110,8 @@ DesarrolloWEB/
 
 ## Licencia
 
-Este proyecto es solo para fines
+Este proyecto es solo para fines educativos y personales.
+
+@felipeMisa 
+@jorgeOrtiz
+© 2025 Descuentos Bear. Todos los derechos reservados.
