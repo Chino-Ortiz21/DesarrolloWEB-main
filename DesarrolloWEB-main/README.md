@@ -53,7 +53,7 @@ Este proyecto es una aplicación web desarrollada con Flask y SQLAlchemy que per
    - Ejecuta los archivos "Scraping(supermrcado).py
    - Siga las instrucciones dentro de la terminal
    - Una vez finalizado los scraping, se crearan archivos (supermercado)ofertas.json
-     Este archibo debe ser copiado y pegado dentro de static\data, se le debe modificar
+     Este archivo debe ser copiado y pegado dentro de static\data, se le debe modificar
      el nombre por: productos_(supermercado).json
 
 
